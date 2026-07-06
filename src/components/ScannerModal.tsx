@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QrCode, X, Camera, ScanLine } from 'lucide-react';
 import { PRODUCTS } from '../data/mockData';
@@ -14,18 +15,22 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   const [counter, setCounter] = useState(3);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
       setScanState('camera-init');
       setCounter(3);
-      return;
     }
 
-    // Initialize camera simulator
-    const initTimer = setTimeout(() => {
+    const initTimer = isOpen ? setTimeout(() => {
       setScanState('scanning');
-    }, 1000);
+    }, 1000) : undefined;
 
-    return () => clearTimeout(initTimer);
+    return () => {
+      if (initTimer) clearTimeout(initTimer);
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -50,9 +55,9 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -68,7 +73,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 350 }}
-          className="relative w-full max-w-md overflow-hidden rounded-premium bg-white p-8 text-center shadow-2xl dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/50"
+          className="relative w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-premium bg-white p-8 text-center shadow-2xl dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/50"
         >
           {/* Close button */}
           <button 
@@ -144,6 +149,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
           </p>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Upload, ShieldCheck } from 'lucide-react';
 
@@ -20,12 +21,18 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
   const [analysisText, setAnalysisText] = useState('');
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
       setStage('idle');
       setSelectedImg(null);
       setAnalysisText('');
-      return;
     }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   const handleSelectSample = (url: string, label: string) => {
@@ -53,9 +60,9 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -71,7 +78,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 350 }}
-          className="relative w-full max-w-md overflow-hidden rounded-premium bg-white p-8 text-center shadow-2xl dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/50"
+          className="relative w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-premium bg-white p-8 text-center shadow-2xl dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/50"
         >
           {/* Close button */}
           <button 
@@ -177,6 +184,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
           )}
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

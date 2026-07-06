@@ -2,10 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, MapPin, Mic, QrCode, Image as ImageIcon, ChevronDown, 
-  User, Heart, ShoppingCart, Bell, Sparkles, Sun, Moon, Languages, Menu
+  User, Heart, ShoppingCart, Bell, Sparkles, Languages, Menu
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useTheme } from '../context/ThemeContext';
 import { PRODUCTS } from '../data/mockData';
 import { VoiceSearchModal } from './VoiceSearchModal';
 import { ScannerModal } from './ScannerModal';
@@ -23,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
     notifications, markNotificationsAsRead 
   } = useCart();
   
-  const { theme, toggleTheme } = useTheme();
+  
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
@@ -287,14 +286,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
           {/* Right Header Navigation controls */}
           <div className="flex items-center gap-1.5 sm:gap-3">
             
-            {/* Dark Mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-              title="Toggle Theme"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5" />}
-            </button>
+            
 
             {/* Language Selector */}
             <div className="relative" ref={langRef}>
