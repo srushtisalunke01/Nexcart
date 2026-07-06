@@ -116,11 +116,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, isOpen,
                 {/* Price */}
                 <div className="flex items-baseline gap-3 mb-6">
                   <span className="text-3xl font-display font-extrabold text-slate-900 dark:text-white">
-                    ${product.discountPrice}
+                    ₹{product.discountPrice}
                   </span>
                   {product.price > product.discountPrice && (
                     <span className="text-lg text-slate-400 line-through">
-                      ${product.price}
+                      ₹{product.price}
                     </span>
                   )}
                 </div>

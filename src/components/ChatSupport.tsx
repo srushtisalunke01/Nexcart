@@ -53,9 +53,9 @@ export const ChatSupport: React.FC = () => {
       let reply = "I'm sorry, I didn't quite catch that. Could you please specify your query? (Type 'shipping', 'rewards', or 'coupon' for quick answers!)";
       
       if (userQuery.includes("shipping") || userQuery.includes("delivery") || userQuery.includes("arrive")) {
-        reply = "Standard delivery on NexCart takes 2-4 business days. Orders over $150 qualify for free express delivery, which usually arrives the next day! You can track your active orders under the 'Live Order Tracking' page in your profile.";
+        reply = "Standard delivery on NexCart takes 2-4 business days. Orders over ₹150 qualify for free express delivery, which usually arrives the next day! You can track your active orders under the 'Live Order Tracking' page in your profile.";
       } else if (userQuery.includes("reward") || userQuery.includes("point") || userQuery.includes("loyalty")) {
-        reply = "For every dollar you spend on NexCart, you earn 10% cashpoints. For example, spending $100 earns you 10 loyalty points (equivalent to $1.00 store credit). You can redeem points directly during checkout to pay for purchases!";
+        reply = "For every rupee you spend on NexCart, you earn 10% cashpoints. For example, spending ₹100 earns you 10 loyalty points (equivalent to ₹1.00 store credit). You can redeem points directly during checkout to pay for purchases!";
       } else if (userQuery.includes("coupon") || userQuery.includes("discount") || userQuery.includes("code")) {
         reply = "You can use code 'NEXCART10' at checkout to receive 10% off your purchase. We also have a special 'SUPERSAVE25' coupon code for 25% off qualifying premium items!";
       } else if (userQuery.includes("return") || userQuery.includes("refund")) {

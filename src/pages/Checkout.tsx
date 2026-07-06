@@ -305,7 +305,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigate }) => {
               </div>
               <div className="flex justify-between">
                 <span>Shipping Net:</span>
-                <span className="text-slate-800 dark:text-white font-bold">${total}</span>
+                <span className="text-slate-800 dark:text-white font-bold">₹{total}</span>
               </div>
             </div>
 
@@ -370,7 +370,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigate }) => {
                 >
                   <Wallet className="h-6 w-6" />
                   <span className="text-xs font-bold">NexWallet</span>
-                  <span className="text-[9px] font-bold text-slate-400">${walletBalance.toFixed(2)}</span>
+                  <span className="text-[9px] font-bold text-slate-400">₹{walletBalance.toFixed(2)}</span>
                 </button>
 
                 {/* COD */}
@@ -463,11 +463,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigate }) => {
                     <div className="flex justify-between items-center bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                       <div>
                         <span className="text-xs text-slate-400">Available Wallet Balance</span>
-                        <p className="text-xl font-display font-extrabold text-slate-800 dark:text-white">${walletBalance.toFixed(2)}</p>
+                        <p className="text-xl font-display font-extrabold text-slate-800 dark:text-white">₹{walletBalance.toFixed(2)}</p>
                       </div>
                       <div>
                         <span className="text-xs text-slate-400">Order Deductable</span>
-                        <p className="text-xl font-display font-extrabold text-brand-500">${total}</p>
+                        <p className="text-xl font-display font-extrabold text-brand-500">₹{total}</p>
                       </div>
                     </div>
                     {walletBalance < total && (
@@ -495,21 +495,21 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigate }) => {
             <div className="space-y-3.5 text-xs text-slate-500 dark:text-slate-400 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex justify-between font-semibold">
                 <span>Items Subtotal:</span>
-                <span className="text-slate-800 dark:text-white">${subtotal}</span>
+                <span className="text-slate-800 dark:text-white">₹{subtotal}</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between font-bold text-brand-500">
                   <span>Discount savings:</span>
-                  <span>-${discountAmount}</span>
+                  <span>-₹{discountAmount}</span>
                 </div>
               )}
               <div className="flex justify-between font-semibold">
                 <span>Delivery Charge:</span>
-                <span>{shippingCharge === 0 ? "FREE" : `$${shippingCharge}`}</span>
+                <span>{shippingCharge === 0 ? "FREE" : `₹${shippingCharge}`}</span>
               </div>
               <div className="flex justify-between text-sm font-extrabold text-slate-905 dark:text-white pt-2 border-t border-dashed border-slate-100 dark:border-slate-800">
                 <span>Invoice Total:</span>
-                <span>${total}</span>
+                <span>₹{total}</span>
               </div>
             </div>
 
@@ -525,7 +525,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigate }) => {
               className="w-full py-4 bg-brand-500 text-white rounded-xl font-bold shadow-lg disabled:opacity-50 hover:bg-brand-600 hover:shadow-premium-orange transition-all flex items-center justify-center gap-2"
             >
               <ShieldCheck className="h-5 w-5" />
-              <span>Verify & Place Order (${total})</span>
+              <span>Verify & Place Order (₹{total})</span>
             </button>
           </div>
         </div>

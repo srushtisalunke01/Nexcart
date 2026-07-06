@@ -305,16 +305,16 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
             {/* Pricing Section */}
             <div className="flex items-baseline gap-3 mb-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/30">
               <span className="text-3xl font-display font-extrabold text-slate-900 dark:text-white">
-                ${product.discountPrice}
+                ₹{product.discountPrice}
               </span>
               {product.price > product.discountPrice && (
                 <span className="text-lg text-slate-400 line-through">
-                  ${product.price}
+                  ₹{product.price}
                 </span>
               )}
               {product.price > product.discountPrice && (
                 <span className="text-xs font-extrabold text-brand-500 ml-auto bg-brand-50 dark:bg-brand-500/10 px-3 py-1 rounded-full border border-brand-100 dark:border-brand-500/15">
-                  SAVE ${product.price - product.discountPrice}
+                  SAVE ₹{product.price - product.discountPrice}
                 </span>
               )}
             </div>
@@ -548,7 +548,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                 <img src={product.images[0]} alt={product.name} className="h-16 w-16 object-contain bg-slate-50 rounded-xl p-2" />
                 <div>
                   <h4 className="font-bold text-xs truncate max-w-[120px]">{product.name}</h4>
-                  <p className="text-[11px] font-extrabold text-slate-500">${product.discountPrice}</p>
+                  <p className="text-[11px] font-extrabold text-slate-500">₹{product.discountPrice}</p>
                 </div>
               </div>
 
@@ -567,7 +567,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                   <img src={bundleProducts[0].images[0]} alt={bundleProducts[0].name} className="h-16 w-16 object-contain bg-slate-50 rounded-xl p-2" />
                   <div>
                     <h4 className="font-bold text-xs truncate max-w-[120px]">{bundleProducts[0].name}</h4>
-                    <p className="text-[11px] font-extrabold text-slate-500">${bundleProducts[0].discountPrice}</p>
+                    <p className="text-[11px] font-extrabold text-slate-500">₹{bundleProducts[0].discountPrice}</p>
                   </div>
                 </div>
               )}
@@ -587,7 +587,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                   <img src={bundleProducts[1].images[0]} alt={bundleProducts[1].name} className="h-16 w-16 object-contain bg-slate-50 rounded-xl p-2" />
                   <div>
                     <h4 className="font-bold text-xs truncate max-w-[120px]">{bundleProducts[1].name}</h4>
-                    <p className="text-[11px] font-extrabold text-slate-500">${bundleProducts[1].discountPrice}</p>
+                    <p className="text-[11px] font-extrabold text-slate-500">₹{bundleProducts[1].discountPrice}</p>
                   </div>
                 </div>
               )}
@@ -598,8 +598,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
               <div>
                 <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Bundle Price</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-display font-extrabold text-slate-800 dark:text-white">${bundleSubtotal}</span>
-                  {bundleSavings > 0 && <span className="text-xs font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded">Saved ${bundleSavings}</span>}
+                  <span className="text-2xl font-display font-extrabold text-slate-800 dark:text-white">₹{bundleSubtotal}</span>
+                  {bundleSavings > 0 && <span className="text-xs font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded">Saved ₹{bundleSavings}</span>}
                 </div>
               </div>
               <button
@@ -630,7 +630,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                 <img src={p.images[0]} alt={p.name} className="h-40 w-full object-contain mb-3" />
                 <h4 className="font-bold text-xs text-slate-800 dark:text-white mb-2 leading-tight line-clamp-2">{p.name}</h4>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-sm font-extrabold text-slate-900 dark:text-white font-display">${p.discountPrice}</span>
+                  <span className="text-sm font-extrabold text-slate-900 dark:text-white font-display">₹{p.discountPrice}</span>
                   {p.discount > 0 && <span className="text-[10px] text-brand-500 font-extrabold">{p.discount}% OFF</span>}
                 </div>
               </div>

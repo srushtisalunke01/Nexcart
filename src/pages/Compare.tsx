@@ -104,7 +104,7 @@ export const Compare: React.FC<CompareProps> = ({ onNavigate }) => {
               <td className="p-5 font-bold text-slate-400 uppercase tracking-wider">Discount Price</td>
               {compareList.map(prod => (
                 <td key={prod.id} className="p-5 text-center font-display font-extrabold text-sm text-slate-800 dark:text-white">
-                  ${prod.discountPrice}
+                  ₹{prod.discountPrice}
                 </td>
               ))}
             </tr>

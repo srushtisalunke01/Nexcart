@@ -173,7 +173,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
                   <div className="p-5 rounded-premium bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/40 flex items-center justify-between shadow-sm">
                     <div>
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">NexWallet Balance</span>
-                      <p className="text-2xl font-display font-extrabold text-slate-850 dark:text-white mt-1">${walletBalance.toFixed(2)}</p>
+                      <p className="text-2xl font-display font-extrabold text-slate-850 dark:text-white mt-1">₹{walletBalance.toFixed(2)}</p>
                     </div>
                     <div className="p-3 bg-brand-500/10 rounded-2xl text-brand-500">
                       <Wallet className="h-6 w-6" />
@@ -277,7 +277,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
                                   <p className="text-[10px] text-slate-400">Qty: {item.quantity} • {item.selectedColor?.name}</p>
                                 </div>
                               </div>
-                              <span className="font-extrabold text-slate-900 dark:text-white">${item.product.discountPrice * item.quantity}</span>
+                              <span className="font-extrabold text-slate-900 dark:text-white">₹{item.product.discountPrice * item.quantity}</span>
                             </div>
                           ))}
                         </div>
@@ -285,7 +285,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
                         {/* Delivery Track details */}
                         <div className="flex flex-col sm:flex-row justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800/60 gap-3">
                           <p className="text-xs text-slate-400">Paid by: <span className="font-semibold text-slate-700 dark:text-slate-300">{ord.paymentMethod}</span></p>
-                          <p className="text-xs font-extrabold text-slate-900 dark:text-white">Total Deducted: ${ord.total}</p>
+                          <p className="text-xs font-extrabold text-slate-900 dark:text-white">Total Deducted: ₹{ord.total}</p>
                         </div>
                       </div>
                     ))}
@@ -321,7 +321,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
                           <div className="min-w-0">
                             <h3 className="font-bold text-xs truncate leading-tight">{prod.name}</h3>
                             <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">{prod.brand}</p>
-                            <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">${prod.discountPrice}</p>
+                            <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">₹{prod.discountPrice}</p>
                           </div>
                         </div>
                         
@@ -398,7 +398,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
                   <div className="absolute h-32 w-32 rounded-full bg-white/10 blur-xl -top-6 -right-6" />
                   <div>
                     <span className="text-xs text-brand-100 font-semibold uppercase tracking-wider">NexWallet Ledger</span>
-                    <p className="text-3xl font-display font-extrabold mt-1.5">${walletBalance.toFixed(2)}</p>
+                    <p className="text-3xl font-display font-extrabold mt-1.5">₹{walletBalance.toFixed(2)}</p>
                     <p className="text-[10px] text-brand-100/80 mt-1">Direct Deductable enabled for checkout.</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-white/15 flex items-center justify-center shadow">
@@ -426,7 +426,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
 
                   <p className="text-xs text-slate-400 leading-normal flex items-start gap-1">
                     <Sparkles className="h-4 w-4 text-brand-500 mt-0.5" />
-                    You are only {500 - loyaltyPoints} cashpoints away from unlocking your next $50 NexCart luxury gift card voucher!
+                    You are only {500 - loyaltyPoints} cashpoints away from unlocking your next ₹50 NexCart luxury gift card voucher!
                   </p>
                 </div>
               </motion.div>

@@ -137,11 +137,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onNavigate })
           <div className="flex items-baseline justify-between gap-1 mb-2">
             <div className="flex items-baseline gap-2">
               <span className="text-base font-extrabold text-slate-900 dark:text-white font-display">
-                ${product.discountPrice}
+                ₹{product.discountPrice}
               </span>
               {product.price > product.discountPrice && (
                 <span className="text-xs text-slate-400 line-through">
-                  ${product.price}
+                  ₹{product.price}
                 </span>
               )}
             </div>

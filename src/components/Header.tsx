@@ -274,7 +274,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
                       <img src={prod.images[0]} alt={prod.name} className="h-10 w-10 object-contain bg-slate-50 rounded-lg p-1 dark:bg-slate-900" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{prod.name}</p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">{prod.brand} • ${prod.discountPrice}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{prod.brand} • ₹{prod.discountPrice}</p>
                       </div>
                     </button>
                   ))}
