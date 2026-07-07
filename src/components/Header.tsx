@@ -14,9 +14,10 @@ interface HeaderProps {
   onNavigate: (page: string, params?: Record<string, any>) => void;
   currentPage: string;
   onToggleCategoryMenu: () => void;
+  isLoggedIn?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggleCategoryMenu }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggleCategoryMenu, isLoggedIn }) => {
   const { 
     cart, wishlist, selectedAddress, addresses, selectAddress, 
     notifications, markNotificationsAsRead 
@@ -421,10 +422,12 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
               className={`p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center gap-1.5 ${
                 currentPage === 'profile' ? 'text-brand-500' : 'text-slate-600 dark:text-slate-300'
               }`}
-              title="My Account"
+              title={isLoggedIn ? "My Account" : "Sign In"}
             >
               <User className="h-5 w-5" />
-              <span className="hidden lg:inline text-xs font-bold">Account</span>
+              <span className="hidden lg:inline text-xs font-bold">
+                {isLoggedIn ? "Account" : "Sign In"}
+              </span>
             </button>
 
           </div>

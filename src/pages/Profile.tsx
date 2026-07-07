@@ -10,9 +10,11 @@ import { useTheme } from '../context/ThemeContext';
 interface ProfileProps {
   onNavigate: (page: string, params?: Record<string, any>) => void;
   initialSection?: string;
+  onLogout?: () => void;
+  userEmail?: string;
 }
 
-export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = 'dashboard' }) => {
+export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = 'dashboard', onLogout, userEmail }) => {
   const { 
     wishlist, orders, walletBalance, loyaltyPoints, addresses, 
     addToCart, toggleWishlist, selectedAddress 
@@ -35,8 +37,12 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
   };
 
   const handleLogout = () => {
-    alert("Logout simulation completed. Returning to catalog home.");
-    onNavigate('home');
+    if (onLogout) {
+      onLogout();
+    } else {
+      alert("Logout simulation completed. Returning to catalog home.");
+      onNavigate('home');
+    }
   };
 
   // Loyalty calculations
@@ -58,16 +64,18 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
         <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-left">
           {/* User Avatar */}
           <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-brand-400 to-brand-500 flex items-center justify-center text-3xl font-extrabold shadow-lg shadow-brand-500/25">
-            AS
+            {userEmail ? userEmail.substring(0, 2).toUpperCase() : 'AS'}
           </div>
           <div>
             <div className="flex flex-col sm:flex-row items-center gap-2">
-              <h1 className="text-2xl font-display font-extrabold">Alex Stark</h1>
+              <h1 className="text-2xl font-display font-extrabold">
+                {userEmail ? userEmail.split('@')[0] : 'Alex Stark'}
+              </h1>
               <span className="text-[10px] font-extrabold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-3 py-1 rounded-full flex items-center gap-1 uppercase tracking-wider">
                 <Sparkles className="h-3 w-3 animate-pulse" /> {loyaltyLevel} member
               </span>
             </div>
-            <p className="text-slate-450 text-xs mt-1">alex.stark@starkenterprises.com • Joined June 2026</p>
+            <p className="text-slate-450 text-xs mt-1">{userEmail || 'alex.stark@starkenterprises.com'} • Joined June 2026</p>
           </div>
         </div>
       </div>

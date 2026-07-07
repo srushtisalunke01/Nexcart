@@ -10,18 +10,40 @@ import { Cart } from './pages/Cart';
 import { Checkout } from './pages/Checkout';
 import { Profile } from './pages/Profile';
 import { Compare } from './pages/Compare';
+import { Login } from './pages/Login';
 
-type Page = 'splash' | 'home' | 'product-details' | 'cart' | 'checkout' | 'profile' | 'compare';
+type Page = 'splash' | 'login' | 'home' | 'product-details' | 'cart' | 'checkout' | 'profile' | 'compare';
 
 export const App = () => {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
   const [pageParams, setPageParams] = useState<Record<string, any>>({});
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('nexcart-logged-in') === 'true';
+  });
+  const [userEmail, setUserEmail] = useState(() => {
+    return localStorage.getItem('nexcart-user-email') || '';
+  });
+
+  const handleLoginSuccess = (email: string) => {
+    setIsLoggedIn(true);
+    setUserEmail(email);
+    localStorage.setItem('nexcart-logged-in', 'true');
+    localStorage.setItem('nexcart-user-email', email);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserEmail('');
+    localStorage.removeItem('nexcart-logged-in');
+    localStorage.removeItem('nexcart-user-email');
+    navigateTo('login');
+  };
 
   // Simple Hash Router sync
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash || '#home';
+      const hash = window.location.hash || '#login';
       
       // Parse parameters e.g., #product-details?id=aud-01
       const [path, query] = hash.split('?');
@@ -35,28 +57,36 @@ export const App = () => {
       }
 
       // Route mapping
-      if (path === '#home') {
-        setCurrentPage('home');
+      const checkLoggedIn = isLoggedIn || localStorage.getItem('nexcart-logged-in') === 'true';
+      if (path === '#login') {
+        setCurrentPage('login');
         setPageParams(params);
-      } else if (path === '#product-details') {
-        setCurrentPage('product-details');
-        setPageParams(params);
-      } else if (path === '#cart') {
-        setCurrentPage('cart');
-        setPageParams(params);
-      } else if (path === '#checkout') {
-        setCurrentPage('checkout');
-        setPageParams(params);
-      } else if (path === '#profile') {
-        setCurrentPage('profile');
-        setPageParams(params);
-      } else if (path === '#compare') {
-        setCurrentPage('compare');
-        setPageParams(params);
+      } else if (!checkLoggedIn) {
+        // Force redirect to login for any other page if not logged in
+        window.location.hash = '#login';
       } else {
-        // Fallback or Initial splash
-        if (currentPage !== 'splash') {
+        // Standard routing for authenticated users
+        if (path === '#home') {
           setCurrentPage('home');
+          setPageParams(params);
+        } else if (path === '#product-details') {
+          setCurrentPage('product-details');
+          setPageParams(params);
+        } else if (path === '#cart') {
+          setCurrentPage('cart');
+          setPageParams(params);
+        } else if (path === '#checkout') {
+          setCurrentPage('checkout');
+          setPageParams(params);
+        } else if (path === '#profile') {
+          setCurrentPage('profile');
+          setPageParams(params);
+        } else if (path === '#compare') {
+          setCurrentPage('compare');
+          setPageParams(params);
+        } else {
+          setCurrentPage('home');
+          window.location.hash = '#home';
         }
       }
 
@@ -76,7 +106,7 @@ export const App = () => {
     }
 
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [currentPage]);
+  }, [currentPage, isLoggedIn]);
 
   const navigateTo = (page: string, params: Record<string, any> = {}) => {
     const query = Object.entries(params)
@@ -94,12 +124,21 @@ export const App = () => {
   };
 
   const handleSplashComplete = () => {
-    setCurrentPage('home');
-    window.location.hash = '#home';
+    if (!isLoggedIn) {
+      setCurrentPage('login');
+      window.location.hash = '#login';
+    } else {
+      setCurrentPage('home');
+      window.location.hash = '#home';
+    }
   };
 
   if (currentPage === 'splash') {
     return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
+  if (currentPage === 'login') {
+    return <Login onNavigate={navigateTo} onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
@@ -110,6 +149,7 @@ export const App = () => {
         currentPage={currentPage}
         onNavigate={navigateTo} 
         onToggleCategoryMenu={() => setCategoryMenuOpen(!categoryMenuOpen)}
+        isLoggedIn={isLoggedIn}
       />
 
       {/* Slide-out Categories Navigation menu */}
@@ -154,6 +194,8 @@ export const App = () => {
             <Profile 
               onNavigate={navigateTo}
               initialSection={pageParams.section || 'dashboard'}
+              onLogout={handleLogout}
+              userEmail={userEmail}
             />
           )}
 

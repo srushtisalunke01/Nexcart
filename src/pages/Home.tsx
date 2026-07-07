@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Laptop, Watch, Sparkles, Shirt, Home as HomeIcon, 
@@ -51,23 +51,25 @@ export const Home: React.FC<HomeProps> = ({
   }, [searchFilter, categoryFilter, subcategoryFilter]);
 
   // Main filtered products list
-  const filteredProducts = PRODUCTS.filter(prod => {
-    if (activeSearch && !prod.name.toLowerCase().includes(activeSearch.toLowerCase()) && 
-                       !prod.category.toLowerCase().includes(activeSearch.toLowerCase()) &&
-                       !prod.brand.toLowerCase().includes(activeSearch.toLowerCase())) {
-      return false;
-    }
-    if (activeCategory && prod.parentCategory !== activeCategory) {
-      return false;
-    }
-    if (activeSubcategory && prod.category !== activeSubcategory) {
-      return false;
-    }
-    if (activeBrand && prod.brand.toLowerCase() !== activeBrand.toLowerCase()) {
-      return false;
-    }
-    return true;
-  });
+  const filteredProducts = useMemo(() => {
+    return PRODUCTS.filter(prod => {
+      if (activeSearch && !prod.name.toLowerCase().includes(activeSearch.toLowerCase()) && 
+                         !prod.category.toLowerCase().includes(activeSearch.toLowerCase()) &&
+                         !prod.brand.toLowerCase().includes(activeSearch.toLowerCase())) {
+        return false;
+      }
+      if (activeCategory && prod.parentCategory !== activeCategory) {
+        return false;
+      }
+      if (activeSubcategory && prod.category !== activeSubcategory) {
+        return false;
+      }
+      if (activeBrand && prod.brand.toLowerCase() !== activeBrand.toLowerCase()) {
+        return false;
+      }
+      return true;
+    });
+  }, [activeSearch, activeCategory, activeSubcategory, activeBrand]);
 
   // Handle visible products for infinite scroll
   useEffect(() => {
