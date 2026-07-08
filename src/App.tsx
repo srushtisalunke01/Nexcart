@@ -11,12 +11,20 @@ import { Checkout } from './pages/Checkout';
 import { Profile } from './pages/Profile';
 import { Compare } from './pages/Compare';
 
-type Page = 'splash' | 'home' | 'product-details' | 'cart' | 'checkout' | 'profile' | 'compare';
+// Marketplace pages & components
+import { Marketplace } from './pages/Marketplace';
+import { SellerDashboard } from './pages/SellerDashboard';
+import { BusinessDashboard } from './pages/BusinessDashboard';
+import { SellButton } from './components/SellButton';
+import { ChatSystem } from './components/ChatSystem';
+
+type Page = 'splash' | 'home' | 'product-details' | 'cart' | 'checkout' | 'profile' | 'compare' | 'marketplace' | 'seller-dashboard' | 'business-dashboard';
 
 export const App = () => {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
   const [pageParams, setPageParams] = useState<Record<string, any>>({});
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+
 
   // Simple Hash Router sync
   useEffect(() => {
@@ -53,12 +61,22 @@ export const App = () => {
       } else if (path === '#compare') {
         setCurrentPage('compare');
         setPageParams(params);
+      } else if (path === '#marketplace') {
+        setCurrentPage('marketplace');
+        setPageParams(params);
+      } else if (path === '#seller-dashboard') {
+        setCurrentPage('seller-dashboard');
+        setPageParams(params);
+      } else if (path === '#business-dashboard') {
+        setCurrentPage('business-dashboard');
+        setPageParams(params);
       } else {
         // Fallback or Initial splash
         if (currentPage !== 'splash') {
           setCurrentPage('home');
         }
       }
+
 
       // Scroll to top on navigation
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -117,6 +135,7 @@ export const App = () => {
         isOpen={categoryMenuOpen}
         onClose={() => setCategoryMenuOpen(false)}
         onSelectCategory={handleSelectCategoryFromDrawer}
+        onNavigate={navigateTo}
       />
 
       {/* Main Page Swapper viewports container */}
@@ -159,6 +178,25 @@ export const App = () => {
 
           {currentPage === 'compare' && (
             <Compare 
+              onNavigate={navigateTo}
+            />
+          )}
+
+          {currentPage === 'marketplace' && (
+            <Marketplace 
+              onNavigate={navigateTo}
+              searchFilter={pageParams.search || ''}
+            />
+          )}
+
+          {currentPage === 'seller-dashboard' && (
+            <SellerDashboard 
+              onNavigate={navigateTo}
+            />
+          )}
+
+          {currentPage === 'business-dashboard' && (
+            <BusinessDashboard 
               onNavigate={navigateTo}
             />
           )}
@@ -208,8 +246,15 @@ export const App = () => {
 
       {/* Floating Chat Assistant */}
       <ChatSupport />
+
+      {/* Floating Sell Button */}
+      {currentPage !== 'checkout' && <SellButton />}
+
+      {/* Chat System drawers */}
+      <ChatSystem />
       
     </div>
+
   );
 };
 

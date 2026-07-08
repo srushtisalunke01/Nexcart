@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Star, ShoppingBag, Eye, Heart, Share2, ShieldCheck, MapPin, 
-  RotateCcw, Check, ChevronRight, Scale
+  RotateCcw, Check, ChevronRight, Scale, MessageSquare
 } from 'lucide-react';
 import { Product, ColorVariant, PRODUCTS } from '../data/mockData';
 import { useCart } from '../context/CartContext';
+import { useMarketplace } from '../context/MarketplaceContext';
 
 interface ProductDetailsProps {
   productId: string;
@@ -13,7 +14,8 @@ interface ProductDetailsProps {
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNavigate }) => {
-  const { addToCart, toggleWishlist, isInWishlist, addToRecentlyViewed, addToCompare, compareList } = useCart();
+  const { addToCart, toggleWishlist, isInWishlist, addToRecentlyViewed, addToCompare, compareList, addNotification } = useCart();
+  const { startChatSession, submitQuoteRequest } = useMarketplace();
   
   // Find product
   const product = PRODUCTS.find(p => p.id === productId) || PRODUCTS[0];
@@ -22,7 +24,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
   const [selectedColor, setSelectedColor] = useState<ColorVariant>(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'specs' | 'features' | 'reviews'>('specs');
+  const [activeTab, setActiveTab] = useState<'specs' | 'features' | 'reviews' | 'questions'>('specs');
   const [addedMessage, setAddedMessage] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -40,16 +42,34 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
   const [bundleChecked, setBundleChecked] = useState([true, true, true]); // Primary, bundle 1, bundle 2
   const [bundleProducts, setBundleProducts] = useState<Product[]>([]);
 
+  // Marketplace states
+  const [quoteQty, setQuoteQty] = useState(product.moq || 5);
+  const [companyName, setCompanyName] = useState('');
+  const [quoteNotes, setQuoteNotes] = useState('');
+  const [quoteSuccess, setQuoteSuccess] = useState(false);
+  const [qaList, setQaList] = useState(product.questions || []);
+  const [newQuestion, setNewQuestion] = useState('');
+  const [newQuestionUser, setNewQuestionUser] = useState('');
+
   // Reset page state on product swap
   useEffect(() => {
     setActiveImg(product.images[0]);
     setSelectedColor(product.colors[0]);
     setSelectedSize(product.sizes?.[0] || null);
-    setQuantity(1);
+    setQuantity(product.moq || 1);
     setIs360Mode(false);
     setSpinIndex(0);
     setAddedMessage(false);
     addToRecentlyViewed(product);
+
+    // Reset marketplace state
+    setQuoteQty(product.moq || 5);
+    setCompanyName('');
+    setQuoteNotes('');
+    setQuoteSuccess(false);
+    setQaList(product.questions || []);
+    setNewQuestion('');
+    setNewQuestionUser('');
 
     // Seed bundle recommendations
     const siblings = PRODUCTS.filter(p => p.id !== product.id && p.parentCategory === product.parentCategory).slice(0, 2);
@@ -92,7 +112,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
   const handleAddToCart = () => {
     addToCart(product, quantity, selectedColor, selectedSize || undefined);
     setAddedMessage(true);
-    setTimeout(() => setAddedMessage(false), 2000);
+    setTimeout(() => setAddedMessage(false), 2055);
   };
 
   const handleBuyNow = () => {
@@ -111,6 +131,23 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleContactSeller = () => {
+    startChatSession(product);
+    addNotification("Chat Initialized", `Conversation active with ${product.sellerName}`);
+  };
+
+  const handleQuoteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitQuoteRequest(product.id, quoteQty, companyName, quoteNotes);
+    setQuoteSuccess(true);
+    addNotification("Quote Request Sent", `Quotation sent successfully to ${product.sellerName}`);
+    setTimeout(() => {
+      setQuoteSuccess(false);
+      setCompanyName('');
+      setQuoteNotes('');
+    }, 3000);
   };
 
   // Bundle calculations
@@ -135,6 +172,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
 
   const isFavorited = isInWishlist(product.id);
   const similarProducts = PRODUCTS.filter(p => p.id !== product.id && p.category === product.category).slice(0, 4);
+
 
   return (
     <motion.div
@@ -263,9 +301,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
           )}
         </div>
 
-        {/* Right Column: Checkout choices and info summaries */}
-        <div className="lg:col-span-5 bg-white dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/40 rounded-premium p-8 shadow-soft flex flex-col justify-between self-stretch">
-          <div>
+        <div className="lg:col-span-5 bg-white dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/40 rounded-premium p-6 sm:p-8 shadow-soft space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-brand-500 uppercase tracking-widest">{product.brand}</span>
               
@@ -366,7 +403,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
             )}
 
             {/* Shipping & Delivery estimations */}
-            <div className="space-y-3 mb-8 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="space-y-3 mb-6 pt-4 border-t border-slate-105 dark:border-slate-800">
               <div className="flex items-center gap-3 text-xs">
                 <MapPin className="h-4.5 w-4.5 text-brand-500" />
                 <div>
@@ -383,13 +420,61 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
               </div>
             </div>
 
-            {/* Quantity Selector */}
+            {/* Seller profile block if marketplace item */}
+            {product.sellerName && product.sellerType !== 'official' && (
+              <div className="mb-6 p-4 rounded-xl border border-slate-100 dark:border-slate-800/85 bg-slate-50/50 dark:bg-slate-900/10 space-y-3">
+                <div className="flex justify-between items-center text-xs font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <span>Seller Profile</span>
+                  <span className="text-[9px] font-extrabold bg-brand-500 text-white px-2 py-0.5 rounded">
+                    {product.sellerType === 'business' ? 'Wholesaler' : 'Individual'}
+                  </span>
+                </div>
+                <div className="flex gap-3 items-center">
+                  {product.sellerLogo ? (
+                    <img src={product.sellerLogo} alt="seller logo" className="h-12 w-12 rounded-xl object-contain border p-1 bg-white" />
+                  ) : (
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-tr from-brand-400 to-brand-500 flex items-center justify-center text-white font-extrabold text-sm shadow">
+                      {product.sellerName.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-bold text-xs text-slate-850 dark:text-white truncate flex items-center gap-1">
+                      {product.sellerName}
+                      {product.sellerVerified && <ShieldCheck className="h-3.5 w-3.5 text-brand-500" />}
+                    </h5>
+                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Rating: <span className="text-amber-500 font-bold">★ {product.sellerRating || 5.0}</span></p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Wholesale Info Block */}
+            {product.sellerType === 'business' && (
+              <div className="mb-6 p-4 rounded-xl border border-dashed border-brand-300 dark:border-brand-500/20 bg-brand-50/5 dark:bg-brand-500/5 space-y-3">
+                <div className="flex justify-between items-center text-xs font-bold">
+                  <span className="text-slate-400">Wholesale MOQ</span>
+                  <span className="text-brand-500 font-extrabold">{product.moq} items</span>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quantity Pricing Tiers</span>
+                  {product.priceTiers?.map((t, idx) => (
+                    <div key={idx} className="flex justify-between text-xs font-semibold py-1 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
+                      <span>{t.qty}+ units</span>
+                      <span className="text-brand-500 font-bold">${t.price} / unit</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selector (Visible for all products) */}
             <div className="flex items-center gap-4 mb-8">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Quantity:</span>
               <div className="flex items-center border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900 px-1 py-1">
                 <button 
-                  onClick={() => setQuantity((prev: number) => Math.max(1, prev - 1))}
-                  className="px-3.5 py-1 text-slate-600 dark:text-slate-400 hover:text-brand-500 font-extrabold text-sm"
+                  onClick={() => setQuantity((prev) => Math.max(product.moq || 1, prev - 1))}
+                  className="px-3.5 py-1 text-slate-650 dark:text-slate-400 hover:text-brand-500 font-extrabold text-sm"
                 >
                   -
                 </button>
@@ -397,8 +482,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                   {quantity}
                 </span>
                 <button 
-                  onClick={() => setQuantity((prev: number) => prev + 1)}
-                  className="px-3.5 py-1 text-slate-600 dark:text-slate-400 hover:text-brand-500 font-extrabold text-sm"
+                  onClick={() => setQuantity((prev) => prev + 1)}
+                  className="px-3.5 py-1 text-slate-650 dark:text-slate-400 hover:text-brand-500 font-extrabold text-sm"
                 >
                   +
                 </button>
@@ -408,6 +493,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
 
           {/* Action CTAs */}
           <div className="space-y-3.5">
+            {/* Standard Checkout Actions (Always visible) */}
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
@@ -457,26 +543,107 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
               <Heart className={`h-4.5 w-4.5 ${isFavorited ? 'fill-current' : ''}`} />
               <span>{isFavorited ? "Saved in Wishlist" : "Add to Wishlist Favorites"}</span>
             </button>
-          </div>
+
+            {/* Marketplace Specific Injections */}
+            {product.sellerType === 'business' && (
+              /* Wholesaler Quote request RFQ Form */
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                <span className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Or Request wholesale quotation</span>
+                {quoteSuccess ? (
+                  <div className="p-3.5 bg-green-500/10 text-green-500 text-xs font-bold rounded-xl text-center">
+                    ✓ Quote request submitted successfully!
+                  </div>
+                ) : (
+                  <form onSubmit={handleQuoteSubmit} className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[9px] text-slate-400 mb-1 font-bold">Company Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="My Corp Ltd"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-500 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] text-slate-400 mb-1 font-bold">Quantity (Min {product.moq || 5})</label>
+                        <input
+                          type="number"
+                          required
+                          min={product.moq || 5}
+                          value={quoteQty}
+                          onChange={(e) => setQuoteQty(parseInt(e.target.value) || (product.moq || 5))}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-500 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-400 mb-1 font-bold">Negotiation Notes / Custom Terms</label>
+                      <input
+                        type="text"
+                        placeholder="Request custom branding or shipping details..."
+                        value={quoteNotes}
+                        onChange={(e) => setQuoteNotes(e.target.value)}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-500 dark:text-white"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        className="flex-1 py-3 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold rounded-xl text-xs hover:opacity-90 transition-all"
+                      >
+                        Submit RFQ Quote
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleContactSeller}
+                        className="px-4 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500"
+                        title="Chat with Wholesaler"
+                      >
+                        <MessageSquare className="h-4.5 w-4.5" />
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {product.sellerType === 'individual' && (
+              /* Community Marketplace chat to negotiate and buy */
+              <div className="space-y-3 pt-4 border-t border-slate-105 dark:border-slate-800/80">
+                <span className="block text-xs font-bold text-slate-400 tracking-wider mb-2">Used Marketplace Listing ({product.condition} condition)</span>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleContactSeller}
+                    className="w-full py-3.5 bg-brand-500 hover:bg-brand-600 hover:shadow-premium-orange text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-brand-500/10"
+                  >
+                    <MessageSquare className="h-4.5 w-4.5 animate-pulse" />
+                    <span>Chat & Negotiate Offer with Seller</span>
+                  </button>
+                </div>
+              </div>
+            )}
         </div>
       </div>
-
-      {/* Tabs detailed specification segment */}
+        {/* Tabs detailed specification segment */}
       <div className="rounded-premium bg-white dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/40 shadow-soft overflow-hidden">
         <div className="flex border-b border-slate-100 dark:border-slate-800">
-          {(['specs', 'features', 'reviews'] as const).map(tab => (
+          {(['specs', 'features', 'reviews', 'questions'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-4 font-display font-extrabold text-sm tracking-wide transition-all border-b-2 uppercase ${
                 activeTab === tab
                   ? 'border-brand-500 text-brand-500'
-                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  : 'border-transparent text-slate-400 hover:text-slate-650'
               }`}
             >
               {tab === 'specs' && "Technical Specifications"}
               {tab === 'features' && "Product Features"}
               {tab === 'reviews' && `Verified Reviews (${product.reviews?.length || 0})`}
+              {tab === 'questions' && `Questions & Answers (${qaList.length})`}
             </button>
           ))}
         </div>
@@ -524,6 +691,69 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                   <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{rev.comment}</p>
                 </div>
               ))}
+            </div>
+          )}
+
+          {activeTab === 'questions' && (
+            <div className="space-y-6">
+              {/* Ask Question Form */}
+              <div className="p-5 border rounded-2xl bg-slate-50/50 dark:bg-slate-900/10 space-y-3 text-left">
+                <h4 className="font-bold text-xs sm:text-sm">Ask a Question</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={newQuestionUser}
+                    onChange={(e) => setNewQuestionUser(e.target.value)}
+                    className="bg-white dark:bg-slate-900 border rounded-xl px-4 py-2.5 text-xs focus:outline-none dark:text-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Ask seller a question..."
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                    className="bg-white dark:bg-slate-900 border rounded-xl px-4 py-2.5 text-xs focus:outline-none dark:text-white"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newQuestion.trim() && newQuestionUser.trim()) {
+                      const newQA = { q: newQuestion.trim(), user: newQuestionUser.trim() };
+                      setQaList(prev => [...prev, newQA]);
+                      setNewQuestion('');
+                      setNewQuestionUser('');
+                    }
+                  }}
+                  className="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold"
+                >
+                  Submit Question
+                </button>
+              </div>
+
+              {/* Questions list */}
+              <div className="space-y-4 divide-y divide-slate-100 dark:divide-slate-800 text-left">
+                {qaList.length === 0 ? (
+                  <p className="text-slate-450 text-xs italic text-center py-4">No questions asked yet. Be the first!</p>
+                ) : (
+                  qaList.map((qa, i) => (
+                    <div key={i} className="pt-4 space-y-1.5 text-xs">
+                      <p className="font-bold text-slate-800 dark:text-white flex items-center gap-1">
+                        <span className="bg-brand-500/10 text-brand-600 px-1.5 py-0.5 rounded text-[9px]">Q</span>
+                        "{qa.q}" <span className="text-[10px] text-slate-400 font-normal font-sans">by {qa.user}</span>
+                      </p>
+                      {qa.a ? (
+                        <p className="pl-6 text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                          <span className="bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded text-[9px]">A</span>
+                          "{qa.a}"
+                        </p>
+                      ) : (
+                        <p className="pl-6 text-slate-450 italic">Awaiting seller response...</p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -628,7 +858,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ productId, onNav
                 className="cursor-pointer overflow-hidden rounded-premium bg-white dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/40 p-4 shadow-soft hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <img src={p.images[0]} alt={p.name} className="h-40 w-full object-contain mb-3" />
-                <h4 className="font-bold text-xs text-slate-800 dark:text-white mb-2 leading-tight line-clamp-2">{p.name}</h4>
+                <h4 className="font-bold text-xs text-slate-800 dark:text-white mb-2 leading-tight line-clamp-2 h-8">{p.name}</h4>
                 <div className="flex justify-between items-baseline">
                   <span className="text-sm font-extrabold text-slate-900 dark:text-white font-display">${p.discountPrice}</span>
                   {p.discount > 0 && <span className="text-[10px] text-brand-500 font-extrabold">{p.discount}% OFF</span>}

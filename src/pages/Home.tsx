@@ -157,9 +157,8 @@ export const Home: React.FC<HomeProps> = ({
         </div>
       )}
 
-      {/* Main Home Deck (Visible only when filters are empty) */}
       {!activeSearch && !activeCategory && !activeSubcategory && !activeBrand && (
-        <>
+        <div className="space-y-12">
           {/* Hero Banner Carousel */}
           <HeroCarousel onNavigate={onNavigate} />
 
@@ -242,7 +241,7 @@ export const Home: React.FC<HomeProps> = ({
               </div>
             </section>
           </div>
-        </>
+        </div>
       )}
 
       {/* Infinite Product Catalog Grid */}

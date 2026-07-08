@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, MapPin, Mic, QrCode, Image as ImageIcon, ChevronDown, 
-  User, Heart, ShoppingCart, Bell, Sparkles, Sun, Moon, Languages, Menu
+  User, Heart, ShoppingCart, Bell, Sparkles, Sun, Moon, Languages, Menu, MessageSquare, Store
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { useMarketplace } from '../context/MarketplaceContext';
 import { PRODUCTS } from '../data/mockData';
 import { VoiceSearchModal } from './VoiceSearchModal';
 import { ScannerModal } from './ScannerModal';
@@ -23,9 +24,12 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
     notifications, markNotificationsAsRead 
   } = useCart();
   
+  const { chats, setActiveChatSession, userRole } = useMarketplace();
   const { theme, toggleTheme } = useTheme();
+
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchScope, setSearchScope] = useState<'store' | 'marketplace'>('store');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [showAddressDropdown, setShowAddressDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -39,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
   const [logoError, setLogoError] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchRefMobile = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
@@ -57,7 +62,10 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+      if (
+        (searchRef.current && !searchRef.current.contains(e.target as Node)) &&
+        (searchRefMobile.current && !searchRefMobile.current.contains(e.target as Node))
+      ) {
         setShowSearchSuggestions(false);
       }
       if (addressRef.current && !addressRef.current.contains(e.target as Node)) {
@@ -76,8 +84,11 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    onNavigate('home', { search: searchQuery });
+    if (searchScope === 'marketplace') {
+      onNavigate('marketplace', searchQuery.trim() ? { search: searchQuery } : {});
+    } else {
+      onNavigate('home', searchQuery.trim() ? { search: searchQuery } : {});
+    }
     setShowSearchSuggestions(false);
   };
 
@@ -89,7 +100,11 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
 
   const triggerModalSearch = (query: string) => {
     setSearchQuery(query);
-    onNavigate('home', { search: query });
+    if (searchScope === 'marketplace') {
+      onNavigate('marketplace', query.trim() ? { search: query } : {});
+    } else {
+      onNavigate('home', query.trim() ? { search: query } : {});
+    }
   };
 
   const handleSelectProductFromScanner = (prodId: string) => {
@@ -143,6 +158,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
               </span>
             </div>
           </div>
+
 
           {/* Delivery Location dropdown */}
           <div className="hidden lg:block relative" ref={addressRef}>
@@ -205,16 +221,32 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
             </AnimatePresence>
           </div>
 
-          {/* AI Search Bar */}
-          <div className="flex-1 max-w-xl relative" ref={searchRef}>
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-brand-300 dark:hover:border-brand-800 transition-colors focus-within:border-brand-500 dark:focus-within:border-brand-500">
+          {/* AI Search Bar - Desktop/Tablet view */}
+          <div className="hidden md:block flex-1 max-w-xl relative" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden hover:border-brand-300 dark:hover:border-brand-800 transition-colors focus-within:border-brand-500 dark:focus-within:border-brand-500">
+              
+              {/* Search Scope selector */}
+              <div className="relative border-r border-slate-200 dark:border-slate-805 self-stretch flex items-center bg-slate-100/50 dark:bg-slate-900/30 shrink-0">
+                <select
+                  value={searchScope}
+                  onChange={(e) => setSearchScope(e.target.value as 'store' | 'marketplace')}
+                  className="bg-transparent pl-3 pr-7 h-full text-xs font-bold text-slate-600 dark:text-slate-405 focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="store">Store</option>
+                  <option value="marketplace">Market</option>
+                </select>
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
               <input
                 type="text"
-                placeholder="Search premium gadgets, fashion, watches..."
+                placeholder={searchScope === 'store' ? "Search premium gadgets, fashion, watches..." : "Search used or wholesale listings..."}
                 value={searchQuery}
                 onFocus={() => setShowSearchSuggestions(true)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2.5 bg-transparent text-sm focus:outline-none dark:text-white pr-24"
+                className="w-full px-3 py-2.5 bg-transparent text-xs focus:outline-none dark:text-white pr-24"
               />
               
               {/* Media tools */}
@@ -285,12 +317,12 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
           </div>
 
           {/* Right Header Navigation controls */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2.5 ml-auto shrink-0">
             
             {/* Dark Mode toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+              className="hidden sm:flex p-2 rounded-xl text-slate-605 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
               title="Toggle Theme"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5" />}
@@ -340,7 +372,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
             </div>
 
             {/* Notifications Trigger */}
-            <div className="relative" ref={notifRef}>
+            <div className="hidden sm:block relative" ref={notifRef}>
               <button
                 onClick={() => {
                   setShowNotifications(!showNotifications);
@@ -386,10 +418,39 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
               </AnimatePresence>
             </div>
 
+            {/* Messages Trigger */}
+            <button
+              onClick={() => {
+                if (chats.length > 0) {
+                  setActiveChatSession(chats[0].id);
+                } else {
+                  onNavigate('profile', { section: 'messages' });
+                }
+              }}
+              className="hidden sm:inline-flex p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative"
+              title="Marketplace Chats"
+            >
+              <MessageSquare className="h-5 w-5" />
+              {chats.some(c => c.unread) && (
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
+              )}
+            </button>
+
+            {/* Marketplace Product List icon button */}
+            <button
+              onClick={() => onNavigate('marketplace')}
+              className={`p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative ${
+                currentPage === 'marketplace' ? 'text-brand-500' : 'text-slate-600 dark:text-slate-300'
+              }`}
+              title="Marketplace Listings"
+            >
+              <Store className="h-5 w-5" />
+            </button>
+
             {/* Wishlist button */}
             <button
               onClick={() => onNavigate('profile', { section: 'wishlist' })}
-              className={`p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative ${
+              className={`hidden sm:inline-flex p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative ${
                 currentPage === 'profile' ? 'text-brand-500' : 'text-slate-600 dark:text-slate-300'
               }`}
               title="Wishlist"
@@ -432,9 +493,107 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage, onToggl
               title="My Account"
             >
               <User className="h-5 w-5" />
-              <span className="hidden lg:inline text-xs font-bold">Account</span>
+              <div className="hidden lg:block text-left">
+                <p className="text-xs font-bold leading-tight">Account</p>
+                <p className="text-[9px] text-slate-400 font-semibold leading-tight capitalize">{userRole} Mode</p>
+              </div>
             </button>
 
+          </div>
+          
+          {/* AI Search Bar - Mobile view row */}
+          <div className="block md:hidden pb-4 pt-1" ref={searchRefMobile}>
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-205 dark:border-slate-800/80 rounded-2xl overflow-hidden hover:border-brand-300 dark:hover:border-brand-800 transition-colors focus-within:border-brand-500 dark:focus-within:border-brand-500">
+              
+              {/* Search Scope selector */}
+              <div className="relative border-r border-slate-200 dark:border-slate-805 self-stretch flex items-center bg-slate-100/50 dark:bg-slate-900/30 shrink-0">
+                <select
+                  value={searchScope}
+                  onChange={(e) => setSearchScope(e.target.value as 'store' | 'marketplace')}
+                  className="bg-transparent pl-3 pr-7 h-full text-xs font-bold text-slate-600 dark:text-slate-405 focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="store">Store</option>
+                  <option value="marketplace">Market</option>
+                </select>
+                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </div>
+              </div>
+
+              <input
+                type="text"
+                placeholder={searchScope === 'store' ? "Search gadgets, fashion..." : "Search marketplace..."}
+                value={searchQuery}
+                onFocus={() => setShowSearchSuggestions(true)}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2.5 bg-transparent text-xs focus:outline-none dark:text-white pr-24"
+              />
+              
+              {/* Media tools */}
+              <div className="absolute right-12 flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                <button 
+                  type="button" 
+                  onClick={() => setIsVoiceOpen(true)}
+                  className="p-1 hover:text-brand-500 rounded transition-colors"
+                  title="Voice Search"
+                >
+                  <Mic className="h-4 w-4" />
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setIsImageSearchOpen(true)}
+                  className="p-1 hover:text-brand-500 rounded transition-colors"
+                  title="Image Search"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setIsScannerOpen(true)}
+                  className="p-1 hover:text-brand-500 rounded transition-colors"
+                  title="Barcode Scanner"
+                >
+                  <QrCode className="h-4 w-4" />
+                </button>
+              </div>
+
+              <button 
+                type="submit"
+                className="absolute right-0 h-full px-4 gradient-orange text-white flex items-center justify-center hover:opacity-90"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
+
+            {/* AI Search suggestions for mobile */}
+            <AnimatePresence>
+              {showSearchSuggestions && searchSuggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute w-[calc(100%-2rem)] mt-2 rounded-2xl bg-white dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden p-2 z-55"
+                >
+                  <div className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-brand-500 bg-brand-50/50 dark:bg-brand-500/10 rounded-xl mb-1">
+                    <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                    <span>AI Search Recommendations</span>
+                  </div>
+                  {searchSuggestions.map(prod => (
+                    <button
+                      key={prod.id}
+                      onClick={() => handleSuggestionClick(prod.id)}
+                      className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors"
+                    >
+                      <img src={prod.images[0]} alt={prod.name} className="h-10 w-10 object-contain bg-slate-50 rounded-lg p-1 dark:bg-slate-900" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{prod.name}</p>
+                        <p className="text-xs text-slate-405 dark:text-slate-500">{prod.brand} • ${prod.discountPrice}</p>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

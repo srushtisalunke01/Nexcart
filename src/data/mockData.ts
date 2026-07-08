@@ -43,7 +43,22 @@ export interface Product {
   bestSeller?: boolean;
   newArrival?: boolean;
   dealOfTheDay?: boolean;
+  // Marketplace fields
+  sellerType?: 'official' | 'business' | 'individual';
+  sellerName?: string;
+  sellerRating?: number;
+  sellerVerified?: boolean;
+  sellerLogo?: string;
+  moq?: number;
+  priceTiers?: { qty: number; price: number }[];
+  condition?: 'New' | 'Like New' | 'Good' | 'Fair' | 'Used';
+  negotiable?: boolean;
+  location?: string;
+  deliveryOption?: 'delivery' | 'pickup' | 'both';
+  isSold?: boolean;
+  questions?: { q: string; a?: string; user: string }[];
 }
+
 
 export interface Category {
   id: string;
@@ -783,7 +798,245 @@ for (let i = 1; i <= 42; i++) {
   });
 }
 
-// Inject standard reviews into all products
+// Inject standard reviews & defaults into all current products
 PRODUCTS.forEach(p => {
   p.reviews = [...MOCK_REVIEWS];
+  p.sellerType = 'official';
+  p.sellerName = 'NEXUS Official';
+  p.sellerRating = 4.9;
+  p.sellerVerified = true;
+  p.questions = [
+    { q: "Is the international warranty applicable?", a: "Yes, NEXUS Official products include a 1-year global warranty.", user: "StarkFan99" },
+    { q: "Does it support quick pairing?", a: "Yes, it integrates seamlessly with the NexCart device ecosystem.", user: "TechGuru" }
+  ];
 });
+
+// Seed Community (Individual used items) listings
+const COMMUNITY_SEEDS: Product[] = [
+  {
+    id: "comm-01",
+    name: "Vintage Mechanical Keyboard (Custom Mod)",
+    tagline: "Thocky linear switches with brass plate.",
+    description: "Selling my custom modified keyboard. Features Gateron Black Ink V2 switches, hand-lubed, custom case foam, and premium PBT double-shot keycaps. Works flawlessly, selling to fund another build.",
+    price: 180,
+    discountPrice: 150,
+    discount: 16,
+    rating: 4.7,
+    reviewsCount: 3,
+    category: "accessories",
+    parentCategory: "electronics",
+    images: [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1595225476474-87563907a212?w=800&auto=format&fit=crop&q=80"
+    ],
+    threeSixtyImages: [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80"
+    ],
+    colors: [
+      { name: "Retro Beige", code: "#e2e8f0" }
+    ],
+    specifications: {
+      "Switches": "Gateron Black Ink V2 (Lubed)",
+      "Keycaps": "Retro DSA Profile PBT",
+      "Condition": "Like New",
+      "Connection": "USB-C Detachable"
+    },
+    features: [
+      "Thocky acoustic sound profile",
+      "Hot-swappable PCB",
+      "Aluminum back weighting plate"
+    ],
+    stock: 1,
+    freeDelivery: false,
+    estimatedDelivery: "3-5 business days",
+    returnPolicy: "No returns (Sold as is)",
+    brand: "Custom",
+    sellerType: "individual",
+    sellerName: "Marcus Vance",
+    sellerRating: 4.8,
+    sellerVerified: true,
+    condition: "Like New",
+    negotiable: true,
+    location: "Brooklyn, NY",
+    deliveryOption: "both",
+    isSold: false,
+    questions: [
+      { q: "Are the keycaps included in the sale?", a: "Yes, the keycaps shown in the pictures are included.", user: "KeyboardCat" }
+    ]
+  },
+  {
+    id: "comm-02",
+    name: "Aero Drone X4 Explorer",
+    tagline: "Lightweight 4K recording drone.",
+    description: "Compact drone with 4K camera and 3-axis stabilization. Includes 3 extra batteries, remote controller, landing pad, and carrying case. Scratched slightly on landing gear, but flys beautifully.",
+    price: 320,
+    discountPrice: 280,
+    discount: 12,
+    rating: 4.2,
+    reviewsCount: 8,
+    category: "cameras",
+    parentCategory: "electronics",
+    images: [
+      "https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=800&auto=format&fit=crop&q=80"
+    ],
+    threeSixtyImages: [
+      "https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=800&auto=format&fit=crop&q=80"
+    ],
+    colors: [
+      { name: "Carbon Matte", code: "#1e293b" }
+    ],
+    specifications: {
+      "Resolution": "4K Ultra HD at 30fps",
+      "Flight Time": "28 mins per battery",
+      "Condition": "Good",
+      "Weight": "249g (No registration required)"
+    },
+    features: [
+      "GPS auto-return home function",
+      "Wind resistance level 5",
+      "Follow-me smart tracking"
+    ],
+    stock: 1,
+    freeDelivery: true,
+    estimatedDelivery: "2-3 business days",
+    returnPolicy: "No returns",
+    brand: "FlyTech",
+    sellerType: "individual",
+    sellerName: "Alex Stark",
+    sellerRating: 4.6,
+    sellerVerified: false,
+    condition: "Good",
+    negotiable: true,
+    location: "Los Angeles, CA",
+    deliveryOption: "delivery",
+    isSold: false,
+    questions: [
+      { q: "How long has it been used?", a: "About 6 months, flown roughly 12 times total.", user: "SkyPilot" }
+    ]
+  }
+];
+
+// Seed Business Wholesaler listings
+const BUSINESS_SEEDS: Product[] = [
+  {
+    id: "biz-01",
+    name: "UltraCharge USB-C Bulk Bundle (50 Pack)",
+    tagline: "Premium braided wholesale charging cables.",
+    description: "Registered wholesale listing for retailers and office supplies. 50-pack high-speed USB-C to USB-C charging cables. Durable nylon braided exterior, supports 100W Power Delivery (PD 3.0), gold-plated connector pins. Individually packaged.",
+    price: 350,
+    discountPrice: 299,
+    discount: 14,
+    rating: 4.9,
+    reviewsCount: 34,
+    category: "accessories",
+    parentCategory: "electronics",
+    images: [
+      "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1541667590938-2d62b7294bb8?w=800&auto=format&fit=crop&q=80"
+    ],
+    threeSixtyImages: [
+      "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&auto=format&fit=crop&q=80"
+    ],
+    colors: [
+      { name: "Onyx Black", code: "#0f172a" },
+      { name: "Titanium Silver", code: "#94a3b8" }
+    ],
+    specifications: {
+      "Pack Size": "50 Cables",
+      "Cable Length": "1.8 meters (6 ft)",
+      "Max Power Output": "100W (20V/5A)",
+      "Standard wholesale MOQ": "2 packs"
+    },
+    features: [
+      "E-marker chip protection certified",
+      "Extreme bending lifecycles tested",
+      "100% Recyclable cardboard individual pack"
+    ],
+    stock: 120,
+    freeDelivery: true,
+    estimatedDelivery: "Delivered in 5-7 business days",
+    returnPolicy: "14-day wholesale bulk return policy",
+    brand: "Anker Wholesale",
+    sellerType: "business",
+    sellerName: "Anker Wholesale Inc.",
+    sellerRating: 4.9,
+    sellerVerified: true,
+    sellerLogo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=120&auto=format&fit=crop&q=60",
+    moq: 2,
+    priceTiers: [
+      { qty: 2, price: 299 },
+      { qty: 5, price: 279 },
+      { qty: 10, price: 249 }
+    ],
+    condition: "New",
+    negotiable: false,
+    location: "Chicago Wholesales, IL",
+    deliveryOption: "delivery",
+    isSold: false,
+    questions: [
+      { q: "Can we request custom branding?", a: "Yes, for orders exceeding 50 packs, custom logo printing is available.", user: "TechRetailer" }
+    ]
+  },
+  {
+    id: "biz-02",
+    name: "Helix Office Ergonomic Chair (Bulk Pallet)",
+    tagline: "Minimum order 5 chairs - ideal for corporate refits.",
+    description: "Premium office chairs wholesale. Pallet options available. Back lumbar support mesh, high quality casters, 4D armrests, full class 4 cylinder certifications. 3-year warranty included.",
+    price: 2500,
+    discountPrice: 2200,
+    discount: 12,
+    rating: 4.8,
+    reviewsCount: 15,
+    category: "furniture",
+    parentCategory: "home",
+    images: [
+      "https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&auto=format&fit=crop&q=80"
+    ],
+    threeSixtyImages: [
+      "https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?w=800&auto=format&fit=crop&q=80"
+    ],
+    colors: [
+      { name: "Stealth Black", code: "#0f172a" }
+    ],
+    specifications: {
+      "Pack Size": "Pallet of 5 chairs",
+      "Certification": "BIFMA & SGS approved",
+      "Weight capacity per chair": "130 kg",
+      "Assembly required": "Simple 10-min process"
+    },
+    features: [
+      "Breathable hyper-mesh layout",
+      "Synchro-tilt recline locking",
+      "Padded 4D armrests"
+    ],
+    stock: 45,
+    freeDelivery: true,
+    estimatedDelivery: "7-10 business days (Freight shipping)",
+    returnPolicy: "30-day wholesale defect replacements",
+    brand: "ErgoCorp Ltd.",
+    sellerType: "business",
+    sellerName: "ErgoCorp Wholesale Solutions",
+    sellerRating: 4.7,
+    sellerVerified: true,
+    sellerLogo: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=120&auto=format&fit=crop&q=60",
+    moq: 1,
+    priceTiers: [
+      { qty: 1, price: 2200 },
+      { qty: 3, price: 1980 },
+      { qty: 5, price: 1850 }
+    ],
+    condition: "New",
+    negotiable: false,
+    location: "Dallas Logistics Hub, TX",
+    deliveryOption: "delivery",
+    isSold: false,
+    questions: [
+      { q: "Is shipping included for residential addresses?", a: "Yes, although freight trucks must be able to access the delivery site.", user: "HomeDesigns" }
+    ]
+  }
+];
+
+PRODUCTS.push(...COMMUNITY_SEEDS, ...BUSINESS_SEEDS);
+

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, Heart, ShoppingBag, MapPin, Wallet, Sparkles, 
-  LogOut, Sun, Moon, Calendar, ChevronRight
+  LogOut, Sun, Moon, Calendar, ChevronRight, MessageSquare, Tag, Building, AlertCircle, Check 
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { useMarketplace } from '../context/MarketplaceContext';
 
 interface ProfileProps {
   onNavigate: (page: string, params?: Record<string, any>) => void;
@@ -15,10 +16,17 @@ interface ProfileProps {
 export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = 'dashboard' }) => {
   const { 
     wishlist, orders, walletBalance, loyaltyPoints, addresses, 
-    addToCart, toggleWishlist, selectedAddress 
+    addToCart, toggleWishlist, selectedAddress, addNotification
   } = useCart();
   
+  const { 
+    marketplaceProducts, chats, businessProfile, deleteListing, markAsSold, renewListing, setActiveChatSession,
+    userRole, setUserRole
+  } = useMarketplace();
+
+  
   const { theme, toggleTheme } = useTheme();
+
   
   const [activeTab, setActiveTab] = useState(initialSection);
   const [addedItem, setAddedItem] = useState<string | null>(null);
@@ -113,11 +121,47 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
           </button>
 
           <button
+            onClick={() => setActiveTab('my-listings')}
+            className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+              activeTab === 'my-listings'
+                ? 'bg-brand-500 text-white shadow-md shadow-brand-500/10'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350'
+            }`}
+          >
+            <span className="flex items-center gap-2"><Tag className="h-4.5 w-4.5" /> My Listings ({marketplaceProducts.filter(p => p.sellerName === 'Alex Stark').length})</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          <button
+            onClick={() => setActiveTab('messages')}
+            className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+              activeTab === 'messages'
+                ? 'bg-brand-500 text-white shadow-md shadow-brand-500/10'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+            }`}
+          >
+            <span className="flex items-center gap-2"><MessageSquare className="h-4.5 w-4.5" /> Messages & Offers ({chats.length})</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          <button
+            onClick={() => setActiveTab('business-profile')}
+            className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+              activeTab === 'business-profile'
+                ? 'bg-brand-500 text-white shadow-md shadow-brand-500/10'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+            }`}
+          >
+            <span className="flex items-center gap-2"><Building className="h-4.5 w-4.5" /> Business Wholesaler</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          <button
             onClick={() => setActiveTab('addresses')}
             className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
               activeTab === 'addresses'
                 ? 'bg-brand-500 text-white shadow-md shadow-brand-500/10'
-                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
             }`}
           >
             <span className="flex items-center gap-2"><MapPin className="h-4.5 w-4.5" /> Saved Locations</span>
@@ -129,7 +173,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
             className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
               activeTab === 'wallet'
                 ? 'bg-brand-500 text-white shadow-md shadow-brand-500/10'
-                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
             }`}
           >
             <span className="flex items-center gap-2"><Wallet className="h-4.5 w-4.5" /> NexWallet & Rewards</span>
@@ -138,7 +182,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
 
           <button
             onClick={toggleTheme}
-            className="w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 flex items-center gap-2"
+            className="w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-355 flex items-center gap-2"
           >
             {theme === 'dark' ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5" />}
             Toggle {theme === 'dark' ? 'Light' : 'Dark'} Mode
@@ -152,8 +196,36 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
           </button>
         </div>
 
+
         {/* Right Side: Tab Displays */}
         <div className="lg:col-span-9 bg-white dark:bg-premium-cardDark border border-slate-100 dark:border-slate-800/40 rounded-premium p-6 sm:p-8 shadow-soft min-h-[400px]">
+          
+          {/* Option as Login Customer or Business */}
+          <div className="flex bg-slate-50 dark:bg-slate-900/60 p-1.5 rounded-xl border border-slate-100 dark:border-slate-800/60 mb-6 max-w-sm">
+            <button
+              onClick={() => setUserRole('customer')}
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                userRole === 'customer'
+                  ? 'bg-white dark:bg-slate-800 text-brand-500 shadow-sm border border-slate-100 dark:border-slate-700/25'
+                  : 'text-slate-400 hover:text-slate-655'
+              }`}
+            >
+              <User className="h-3.5 w-3.5" />
+              Customer Account
+            </button>
+            <button
+              onClick={() => setUserRole('business')}
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                userRole === 'business'
+                  ? 'bg-white dark:bg-slate-800 text-brand-500 shadow-sm border border-slate-100 dark:border-slate-700/25'
+                  : 'text-slate-400 hover:text-slate-655'
+              }`}
+            >
+              <Building className="h-3.5 w-3.5" />
+              Business Account
+            </button>
+          </div>
+
           <AnimatePresence mode="wait">
             
             {/* OVERVIEW PANEL */}
@@ -431,6 +503,177 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate, initialSection = '
                 </div>
               </motion.div>
             )}
+
+            {/* MY MARKETPLACE LISTINGS PANEL */}
+            {activeTab === 'my-listings' && (
+              <motion.div
+                key="my-listings"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-display font-extrabold text-slate-905 dark:text-white">My Marketplace Listings</h2>
+                  <button
+                    onClick={() => onNavigate('seller-dashboard')}
+                    className="text-xs font-bold text-brand-500 hover:underline"
+                  >
+                    Open Seller Dashboard
+                  </button>
+                </div>
+
+                {marketplaceProducts.filter(p => p.sellerName === 'Alex Stark').length === 0 ? (
+                  <div className="text-center py-12 border border-slate-100 dark:border-slate-800/40 rounded-premium">
+                    <AlertCircle className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-slate-450 text-sm font-semibold mb-3">You do not have any active listings.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {marketplaceProducts.filter(p => p.sellerName === 'Alex Stark').map(prod => (
+                      <div key={prod.id} className="p-4 border rounded-premium bg-slate-50/50 dark:bg-slate-900/10 flex gap-4">
+                        <img src={prod.images[0]} alt={prod.name} className="h-16 w-16 object-contain bg-white rounded-xl p-1.5 border" />
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-start gap-2">
+                              <h4 className="font-bold text-xs truncate">{prod.name}</h4>
+                              <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                                prod.isSold ? 'bg-slate-200 text-slate-700' : 'bg-brand-500 text-white'
+                              }`}>
+                                {prod.isSold ? 'SOLD' : 'ACTIVE'}
+                              </span>
+                            </div>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white mt-1">${prod.discountPrice}</p>
+                          </div>
+                          
+                          <div className="flex gap-2 mt-2">
+                            {!prod.isSold ? (
+                              <button
+                                onClick={() => {
+                                  markAsSold(prod.id);
+                                  addNotification("Sold Update", "Listing marked as sold.");
+                                }}
+                                className="flex-1 py-1 bg-green-500 text-white text-[10px] font-bold rounded-lg"
+                              >
+                                Mark Sold
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  renewListing(prod.id);
+                                  addNotification("Listing Bumped", "Listing renewed successfully.");
+                                }}
+                                className="flex-1 py-1 bg-slate-900 dark:bg-white dark:text-slate-950 text-white text-[10px] font-bold rounded-lg"
+                              >
+                                Renew
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                deleteListing(prod.id);
+                                addNotification("Deleted", "Listing removed permanently.");
+                              }}
+                              className="px-2 py-1 border border-red-200 text-red-500 text-[10px] font-bold rounded-lg"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* MESSAGES & NEGOTIATIONS PANEL */}
+            {activeTab === 'messages' && (
+              <motion.div
+                key="messages"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="space-y-6"
+              >
+                <h2 className="text-xl font-display font-extrabold text-slate-905 dark:text-white">Active Conversations</h2>
+
+                {chats.length === 0 ? (
+                  <div className="text-center py-12 border border-slate-100 dark:border-slate-800/40 rounded-premium">
+                    <MessageSquare className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-slate-450 text-sm font-semibold">No active chat sessions.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 dark:divide-slate-850">
+                    {chats.map(chat => (
+                      <div
+                        key={chat.id}
+                        onClick={() => setActiveChatSession(chat.id)}
+                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 flex items-center justify-between gap-4 cursor-pointer rounded-xl transition-colors ${
+                          chat.unread ? 'bg-brand-500/5 font-bold border-l-4 border-brand-500' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <img src={chat.productImage} alt={chat.productName} className="h-10 w-10 object-contain bg-white rounded-lg p-1 border" />
+                          <div>
+                            <h4 className="font-bold text-xs sm:text-sm text-slate-850 dark:text-white leading-tight">{chat.sellerName}</h4>
+                            <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[200px]">Item: {chat.productName}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[250px] mt-1 italic">
+                              "{chat.messages[chat.messages.length - 1]?.text}"
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-[9px] text-slate-400">{chat.messages[chat.messages.length - 1]?.timestamp}</span>
+                          {chat.unread && <span className="block h-2 w-2 rounded-full bg-brand-500 ml-auto mt-1" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* BUSINESS PROFILE PANEL */}
+            {activeTab === 'business-profile' && (
+              <motion.div
+                key="business-profile"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-display font-extrabold text-slate-905 dark:text-white">Business Wholesaler Account</h2>
+                  <button
+                    onClick={() => onNavigate('business-dashboard')}
+                    className="text-xs font-bold text-brand-500 hover:underline"
+                  >
+                    Open Wholesaler Dashboard
+                  </button>
+                </div>
+
+                <div className="p-6 border rounded-premium bg-slate-50/50 dark:bg-slate-900/10 space-y-4">
+                  <div className="flex gap-4 items-center">
+                    <img src={businessProfile.logo} alt="biz logo" className="h-16 w-16 border rounded-xl object-contain bg-white p-1.5 shadow-sm" />
+                    <div>
+                      <h4 className="font-extrabold text-sm sm:text-base flex items-center gap-1.5">
+                        {businessProfile.companyName}
+                        <span className="text-[8px] font-extrabold bg-brand-500 text-white px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                          <Check className="h-3 w-3" /> VERIFIED
+                        </span>
+                      </h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Tax Registration ID: {businessProfile.taxId}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-405 font-medium leading-relaxed">{businessProfile.description}</p>
+                  <p className="text-xs font-semibold text-brand-600 bg-brand-50/50 border border-brand-100/10 px-3.5 py-2.5 rounded-xl dark:bg-brand-500/5 dark:text-brand-400">
+                    Verified wholesale operations are active. You can list items with custom quantity tier pricing and receive bulk quotes from clients.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
 
           </AnimatePresence>
         </div>

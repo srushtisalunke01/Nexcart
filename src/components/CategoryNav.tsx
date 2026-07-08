@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Laptop, Watch, Sparkles, Shirt, Home, ChevronRight, Tags } from 'lucide-react';
+import { X, Laptop, Watch, Sparkles, Shirt, Home, ChevronRight, Tags, Store } from 'lucide-react';
 import { CATEGORIES } from '../data/mockData';
 
 interface CategoryNavProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectCategory: (catId: string, subCatId?: string) => void;
+  onNavigate: (page: string, params?: Record<string, any>) => void;
 }
 
 const iconMap: Record<string, React.FC<any>> = {
@@ -17,7 +18,7 @@ const iconMap: Record<string, React.FC<any>> = {
   Home
 };
 
-export const CategoryNav: React.FC<CategoryNavProps> = ({ isOpen, onClose, onSelectCategory }) => {
+export const CategoryNav: React.FC<CategoryNavProps> = ({ isOpen, onClose, onSelectCategory, onNavigate }) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -78,7 +79,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ isOpen, onClose, onSel
                       </button>
 
                       {/* Subcategories list */}
-                      <div className="mt-2 ml-2 pl-4 border-l-2 border-slate-100 dark:border-slate-800/80 space-y-1 pb-2">
+                      <div className="mt-2 ml-2 pl-4 border-l-2 border-slate-105 dark:border-slate-800/80 space-y-1 pb-2">
                         {cat.subcategories.map((sub) => (
                           <button
                             key={sub.id}
@@ -95,6 +96,33 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ isOpen, onClose, onSel
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Department Catalogues Switcher Options */}
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-900/10 space-y-2">
+                <span className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Switch Catalogues</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      onNavigate('home');
+                      onClose();
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-800 transition-all font-display font-bold text-[10px]"
+                  >
+                    <Laptop className="h-3.5 w-3.5 text-brand-500" />
+                    <span>Official Shop</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigate('marketplace');
+                      onClose();
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-800 transition-all font-display font-bold text-[10px]"
+                  >
+                    <Store className="h-3.5 w-3.5 text-brand-500" />
+                    <span>Marketplace</span>
+                  </button>
+                </div>
               </div>
 
               {/* Footer */}
