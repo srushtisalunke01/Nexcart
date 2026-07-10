@@ -38,7 +38,7 @@ export const Home = ({
   const [visibleProducts, setVisibleProducts] = useState([]);
   const [loadedCount, setLoadedCount] = useState(8);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const loaderRef = useRef(null);
 
   // Sync props filters to states
@@ -47,7 +47,7 @@ export const Home = ({
     setActiveCategory(categoryFilter);
     setActiveSubcategory(subcategoryFilter);
     setLoadedCount(8);
-    setHasMore(true);
+    setHasMore(false);
   }, [searchFilter, categoryFilter, subcategoryFilter]);
 
   // Main filtered products list
@@ -80,37 +80,8 @@ export const Home = ({
   // Handle visible products for infinite scroll
   useEffect(() => {
     setVisibleProducts(filteredProducts.slice(0, loadedCount));
-    setHasMore(loadedCount < filteredProducts.length);
+    setHasMore(false);
   }, [filteredProducts, loadedCount]);
-
-  // Setup dynamic loading simulation (infinite scroll)
-  useEffect(() => {
-    if (!hasMore || isLoadingMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsLoadingMore(true);
-          // Simulating lazy load request response
-          setTimeout(() => {
-            setLoadedCount((prev) => prev + 4);
-            setIsLoadingMore(false);
-          }, 1200);
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
-
-    return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
-    };
-  }, [hasMore, isLoadingMore, visibleProducts]);
 
   const clearAllFilters = () => {
     setActiveSearch("");
