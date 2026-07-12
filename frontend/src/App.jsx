@@ -10,45 +10,23 @@ import { Cart } from "./pages/Cart";
 import { Checkout } from "./pages/Checkout";
 import { Profile } from "./pages/Profile";
 import { Compare } from "./pages/Compare";
-import { Login } from "./pages/Login";
-import { useTheme } from "./context/ThemeContext";
+
+// Marketplace pages & components
+import { Marketplace } from "./pages/Marketplace";
+import { SellerDashboard } from "./pages/SellerDashboard";
+import { BusinessDashboard } from "./pages/BusinessDashboard";
+import { SellButton } from "./components/SellButton";
+import { ChatSystem } from "./components/ChatSystem";
 
 export const App = () => {
   const [currentPage, setCurrentPage] = useState("splash");
   const [pageParams, setPageParams] = useState({});
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem("nexcart-logged-in") === "true";
-  });
-  const [userEmail, setUserEmail] = useState(() => {
-    return localStorage.getItem("nexcart-user-email") || "";
-  });
-  const [logoError, setLogoError] = useState(false);
-  const { theme } = useTheme();
-
-  useEffect(() => {
-    setLogoError(false);
-  }, [theme]);
-
-  const handleLoginSuccess = (email) => {
-    setIsLoggedIn(true);
-    setUserEmail(email);
-    localStorage.setItem("nexcart-logged-in", "true");
-    localStorage.setItem("nexcart-user-email", email);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserEmail("");
-    localStorage.removeItem("nexcart-logged-in");
-    localStorage.removeItem("nexcart-user-email");
-    navigateTo("login");
-  };
 
   // Simple Hash Router sync
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash || "#login";
+      const hash = window.location.hash || "#home";
       // Parse parameters e.g., #product-details?id=aud-01
       const [path, query] = hash.split("?");
       const params = {};
@@ -60,37 +38,37 @@ export const App = () => {
       }
 
       // Route mapping
-      const checkLoggedIn =
-        isLoggedIn || localStorage.getItem("nexcart-logged-in") === "true";
-      if (path === "#login") {
-        setCurrentPage("login");
+      if (path === "#home") {
+        setCurrentPage("home");
         setPageParams(params);
-      } else if (!checkLoggedIn) {
-        // Force redirect to login for any other page if not logged in
-        window.location.hash = "#login";
+      } else if (path === "#product-details") {
+        setCurrentPage("product-details");
+        setPageParams(params);
+      } else if (path === "#cart") {
+        setCurrentPage("cart");
+        setPageParams(params);
+      } else if (path === "#checkout") {
+        setCurrentPage("checkout");
+        setPageParams(params);
+      } else if (path === "#profile") {
+        setCurrentPage("profile");
+        setPageParams(params);
+      } else if (path === "#compare") {
+        setCurrentPage("compare");
+        setPageParams(params);
+      } else if (path === "#marketplace") {
+        setCurrentPage("marketplace");
+        setPageParams(params);
+      } else if (path === "#seller-dashboard") {
+        setCurrentPage("seller-dashboard");
+        setPageParams(params);
+      } else if (path === "#business-dashboard") {
+        setCurrentPage("business-dashboard");
+        setPageParams(params);
       } else {
-        // Standard routing for authenticated users
-        if (path === "#home") {
+        // Fallback or Initial splash
+        if (currentPage !== "splash") {
           setCurrentPage("home");
-          setPageParams(params);
-        } else if (path === "#product-details") {
-          setCurrentPage("product-details");
-          setPageParams(params);
-        } else if (path === "#cart") {
-          setCurrentPage("cart");
-          setPageParams(params);
-        } else if (path === "#checkout") {
-          setCurrentPage("checkout");
-          setPageParams(params);
-        } else if (path === "#profile") {
-          setCurrentPage("profile");
-          setPageParams(params);
-        } else if (path === "#compare") {
-          setCurrentPage("compare");
-          setPageParams(params);
-        } else {
-          setCurrentPage("home");
-          window.location.hash = "#home";
         }
       }
 
@@ -109,7 +87,7 @@ export const App = () => {
     }
 
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [currentPage, isLoggedIn]);
+  }, [currentPage]);
 
   const navigateTo = (page, params = {}) => {
     const query = Object.entries(params)
@@ -127,23 +105,12 @@ export const App = () => {
   };
 
   const handleSplashComplete = () => {
-    if (!isLoggedIn) {
-      setCurrentPage("login");
-      window.location.hash = "#login";
-    } else {
-      setCurrentPage("home");
-      window.location.hash = "#home";
-    }
+    setCurrentPage("home");
+    window.location.hash = "#home";
   };
 
   if (currentPage === "splash") {
     return <SplashScreen onComplete={handleSplashComplete} />;
-  }
-
-  if (currentPage === "login") {
-    return (
-      <Login onNavigate={navigateTo} onLoginSuccess={handleLoginSuccess} />
-    );
   }
 
   return (
@@ -153,7 +120,6 @@ export const App = () => {
         currentPage={currentPage}
         onNavigate={navigateTo}
         onToggleCategoryMenu={() => setCategoryMenuOpen(!categoryMenuOpen)}
-        isLoggedIn={isLoggedIn}
       />
 
       {/* Slide-out Categories Navigation menu */}
@@ -161,6 +127,7 @@ export const App = () => {
         isOpen={categoryMenuOpen}
         onClose={() => setCategoryMenuOpen(false)}
         onSelectCategory={handleSelectCategoryFromDrawer}
+        onNavigate={navigateTo}
       />
 
       {/* Main Page Swapper viewports container */}
@@ -190,12 +157,25 @@ export const App = () => {
             <Profile
               onNavigate={navigateTo}
               initialSection={pageParams.section || "dashboard"}
-              onLogout={handleLogout}
-              userEmail={userEmail}
             />
           )}
 
           {currentPage === "compare" && <Compare onNavigate={navigateTo} />}
+
+          {currentPage === "marketplace" && (
+            <Marketplace
+              onNavigate={navigateTo}
+              searchFilter={pageParams.search || ""}
+            />
+          )}
+
+          {currentPage === "seller-dashboard" && (
+            <SellerDashboard onNavigate={navigateTo} />
+          )}
+
+          {currentPage === "business-dashboard" && (
+            <BusinessDashboard onNavigate={navigateTo} />
+          )}
         </AnimatePresence>
       </main>
 
@@ -204,33 +184,37 @@ export const App = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-6 border-b border-slate-105 dark:border-slate-800 pb-8 mb-8">
             <div className="flex items-center gap-2">
-              {!logoError ? (
-                <img
-                  src={theme === "light" ? "/logo-light.jpeg" : "/logo.png"}
-                  alt="NexCart"
-                  className="h-8 w-8 object-contain rounded-lg"
-                  onError={() => setLogoError(true)}
-                />
-              ) : (
-                <div id="footer-logo-fallback">
-                  <svg
-                    className="h-7 w-7 text-brand-500 fill-current"
-                    viewBox="0 0 100 100"
-                  >
-                    <rect width="100" height="100" rx="25" fill="#FF6B00" />
-                    <path
-                      d="M30 35 L45 35 L55 65 L75 65"
-                      stroke="white"
-                      strokeWidth="7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                    <circle cx="48" cy="78" r="7" fill="white" />
-                    <circle cx="71" cy="78" r="7" fill="white" />
-                  </svg>
-                </div>
-              )}
+              <img
+                src="/logo.png"
+                alt="NexCart"
+                className="h-8 w-8 object-contain rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const fallback = document.getElementById(
+                    "footer-logo-fallback",
+                  );
+                  if (fallback) fallback.style.display = "block";
+                }}
+              />
+
+              <div id="footer-logo-fallback" className="hidden">
+                <svg
+                  className="h-7 w-7 text-brand-500 fill-current"
+                  viewBox="0 0 100 100"
+                >
+                  <rect width="100" height="100" rx="25" fill="#FF6B00" />
+                  <path
+                    d="M30 35 L45 35 L55 65 L75 65"
+                    stroke="white"
+                    strokeWidth="7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                  <circle cx="48" cy="78" r="7" fill="white" />
+                  <circle cx="71" cy="78" r="7" fill="white" />
+                </svg>
+              </div>
               <span className="text-xl font-display font-extrabold">
                 <span className="text-slate-800 dark:text-white">Nex</span>
                 <span className="text-cyber-gold text-glow-gold">Cart</span>
@@ -272,6 +256,12 @@ export const App = () => {
 
       {/* Floating Chat Assistant */}
       <ChatSupport />
+
+      {/* Floating Sell Button */}
+      {currentPage !== "checkout" && <SellButton />}
+
+      {/* Chat System drawers */}
+      <ChatSystem />
     </div>
   );
 };

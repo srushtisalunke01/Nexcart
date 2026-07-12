@@ -53,14 +53,14 @@ export const ChatSupport = () => {
         userQuery.includes("arrive")
       ) {
         reply =
-          "Standard delivery on NexCart takes 2-4 business days. Orders over ₹150 qualify for free express delivery, which usually arrives the next day! You can track your active orders under the 'Live Order Tracking' page in your profile.";
+          "Standard delivery on NexCart takes 2-4 business days. Orders over $150 qualify for free express delivery, which usually arrives the next day! You can track your active orders under the 'Live Order Tracking' page in your profile.";
       } else if (
         userQuery.includes("reward") ||
         userQuery.includes("point") ||
         userQuery.includes("loyalty")
       ) {
         reply =
-          "For every rupee you spend on NexCart, you earn 10% cashpoints. For example, spending ₹100 earns you 10 loyalty points (equivalent to ₹1.00 store credit). You can redeem points directly during checkout to pay for purchases!";
+          "For every dollar you spend on NexCart, you earn 10% cashpoints. For example, spending $100 earns you 10 loyalty points (equivalent to $1.00 store credit). You can redeem points directly during checkout to pay for purchases!";
       } else if (
         userQuery.includes("coupon") ||
         userQuery.includes("discount") ||

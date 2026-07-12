@@ -194,11 +194,11 @@ export const Cart = ({ onNavigate }) => {
                     {/* Price calculation block */}
                     <div className="text-right">
                       <p className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
-                        ₹{item.product.discountPrice * item.quantity}
+                        ${item.product.discountPrice * item.quantity}
                       </p>
                       {item.quantity > 1 && (
                         <p className="text-[10px] text-slate-400">
-                          ₹{item.product.discountPrice} each
+                          ${item.product.discountPrice} each
                         </p>
                       )}
                     </div>
@@ -227,7 +227,7 @@ export const Cart = ({ onNavigate }) => {
           <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800/30 rounded-2xl text-[10px] text-slate-400">
             <Info className="h-4 w-4 text-brand-500" />
             <span>
-              Orders over ₹150 unlock free delivery automatically. We support
+              Orders over $150 unlock free delivery automatically. We support
               instant, fully-secured biometric payment verification protocols.
             </span>
           </div>
@@ -300,7 +300,7 @@ export const Cart = ({ onNavigate }) => {
               <div className="flex justify-between font-semibold">
                 <span>Items Subtotal:</span>
                 <span className="text-slate-800 dark:text-white">
-                  ₹{subtotal}
+                  ${subtotal}
                 </span>
               </div>
 
@@ -309,7 +309,7 @@ export const Cart = ({ onNavigate }) => {
                   <span>
                     Coupon Discount ({appliedCoupon.discountPercent}%):
                   </span>
-                  <span>-₹{discountAmount}</span>
+                  <span>-${discountAmount}</span>
                 </div>
               )}
 
@@ -318,14 +318,14 @@ export const Cart = ({ onNavigate }) => {
                 <span
                   className={`font-bold ${shippingCharge === 0 ? "text-green-500 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded" : "text-slate-800 dark:text-white"}`}
                 >
-                  {shippingCharge === 0 ? "FREE" : `₹${shippingCharge}`}
+                  {shippingCharge === 0 ? "FREE" : `$${shippingCharge}`}
                 </span>
               </div>
 
               {totalSavings > 0 && (
                 <div className="flex justify-between font-bold text-green-500">
                   <span>Total Savings:</span>
-                  <span>₹{totalSavings} Saved</span>
+                  <span>${totalSavings} Saved</span>
                 </div>
               )}
 
@@ -333,7 +333,7 @@ export const Cart = ({ onNavigate }) => {
 
               <div className="flex justify-between text-base font-extrabold text-slate-900 dark:text-white font-display">
                 <span>Net Payable:</span>
-                <span>₹{total}</span>
+                <span>${total}</span>
               </div>
             </div>
 

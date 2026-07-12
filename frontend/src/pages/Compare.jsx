@@ -118,7 +118,7 @@ export const Compare = ({ onNavigate }) => {
                   key={prod.id}
                   className="p-5 text-center font-display font-extrabold text-sm text-slate-800 dark:text-white"
                 >
-                  ₹{prod.discountPrice}
+                  ${prod.discountPrice}
                 </td>
               ))}
             </tr>

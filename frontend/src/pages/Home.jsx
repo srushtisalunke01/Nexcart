@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Laptop,
@@ -38,7 +38,7 @@ export const Home = ({
   const [visibleProducts, setVisibleProducts] = useState([]);
   const [loadedCount, setLoadedCount] = useState(8);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
 
   // Sync props filters to states
@@ -47,41 +47,65 @@ export const Home = ({
     setActiveCategory(categoryFilter);
     setActiveSubcategory(subcategoryFilter);
     setLoadedCount(8);
-    setHasMore(false);
+    setHasMore(true);
   }, [searchFilter, categoryFilter, subcategoryFilter]);
 
   // Main filtered products list
-  const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((prod) => {
-      if (
-        activeSearch &&
-        !prod.name.toLowerCase().includes(activeSearch.toLowerCase()) &&
-        !prod.category.toLowerCase().includes(activeSearch.toLowerCase()) &&
-        !prod.brand.toLowerCase().includes(activeSearch.toLowerCase())
-      ) {
-        return false;
-      }
-      if (activeCategory && prod.parentCategory !== activeCategory) {
-        return false;
-      }
-      if (activeSubcategory && prod.category !== activeSubcategory) {
-        return false;
-      }
-      if (
-        activeBrand &&
-        prod.brand.toLowerCase() !== activeBrand.toLowerCase()
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [activeSearch, activeCategory, activeSubcategory, activeBrand]);
+  const filteredProducts = PRODUCTS.filter((prod) => {
+    if (
+      activeSearch &&
+      !prod.name.toLowerCase().includes(activeSearch.toLowerCase()) &&
+      !prod.category.toLowerCase().includes(activeSearch.toLowerCase()) &&
+      !prod.brand.toLowerCase().includes(activeSearch.toLowerCase())
+    ) {
+      return false;
+    }
+    if (activeCategory && prod.parentCategory !== activeCategory) {
+      return false;
+    }
+    if (activeSubcategory && prod.category !== activeSubcategory) {
+      return false;
+    }
+    if (activeBrand && prod.brand.toLowerCase() !== activeBrand.toLowerCase()) {
+      return false;
+    }
+    return true;
+  });
 
   // Handle visible products for infinite scroll
   useEffect(() => {
     setVisibleProducts(filteredProducts.slice(0, loadedCount));
-    setHasMore(false);
+    setHasMore(loadedCount < filteredProducts.length);
   }, [filteredProducts, loadedCount]);
+
+  // Setup dynamic loading simulation (infinite scroll)
+  useEffect(() => {
+    if (!hasMore || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsLoadingMore(true);
+          // Simulating lazy load request response
+          setTimeout(() => {
+            setLoadedCount((prev) => prev + 4);
+            setIsLoadingMore(false);
+          }, 1200);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [hasMore, isLoadingMore, visibleProducts]);
 
   const clearAllFilters = () => {
     setActiveSearch("");
@@ -140,12 +164,11 @@ export const Home = ({
         </div>
       )}
 
-      {/* Main Home Deck (Visible only when filters are empty) */}
       {!activeSearch &&
         !activeCategory &&
         !activeSubcategory &&
         !activeBrand && (
-          <>
+          <div className="space-y-12">
             {/* Hero Banner Carousel */}
             <HeroCarousel onNavigate={onNavigate} />
 
@@ -240,7 +263,7 @@ export const Home = ({
                 </div>
               </section>
             </div>
-          </>
+          </div>
         )}
 
       {/* Infinite Product Catalog Grid */}

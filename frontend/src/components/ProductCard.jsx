@@ -7,18 +7,34 @@ import {
   Eye,
   Flame,
   ShieldAlert,
+  MessageSquare,
+  Scale,
+  Share2,
+  MapPin,
+  Check,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { useMarketplace } from "../context/MarketplaceContext";
 import { QuickViewModal } from "./QuickViewModal";
 
 export const ProductCard = ({ product, onNavigate }) => {
-  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const {
+    addToCart,
+    toggleWishlist,
+    isInWishlist,
+    addToCompare,
+    compareList,
+    addNotification,
+  } = useCart();
+  const { startChatSession } = useMarketplace();
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [added, setAdded] = useState(false);
+  const [shared, setShared] = useState(false);
 
   const favorited = isInWishlist(product.id);
+  const isCompared = compareList.some((p) => p.id === product.id);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -31,6 +47,30 @@ export const ProductCard = ({ product, onNavigate }) => {
     e.stopPropagation();
     addToCart(product, 1, selectedColor, product.sizes?.[0]);
     onNavigate("cart");
+  };
+
+  const handleContactSeller = (e) => {
+    e.stopPropagation();
+    startChatSession(product);
+    addNotification(
+      "Chat Initialized",
+      `Chat session started with ${product.sellerName}`,
+    );
+    // Will be managed by App layout
+  };
+
+  const handleCompareClick = (e) => {
+    e.stopPropagation();
+    addToCompare(product);
+  };
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(
+      `${window.location.origin}/#product-details?id=${product.id}`,
+    );
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
   };
 
   return (
@@ -66,24 +106,59 @@ export const ProductCard = ({ product, onNavigate }) => {
                 TRENDING
               </span>
             )}
+            {product.sellerType && product.sellerType !== "official" && (
+              <span
+                className={`text-[9px] font-extrabold px-2.5 py-1 rounded-full shadow-md text-white ${
+                  product.sellerType === "business"
+                    ? "bg-amber-500"
+                    : "bg-indigo-500"
+                }`}
+              >
+                {product.sellerType === "business" ? "WHOLESALE" : "COMMUNITY"}
+              </span>
+            )}
           </div>
 
-          {/* Wishlist Heart */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleWishlist(product);
-            }}
-            className="absolute top-6 right-6 z-10 h-9 w-9 rounded-full bg-white/95 dark:bg-slate-800/90 shadow-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:scale-110 active:scale-95 transition-all"
-          >
-            <Heart
-              className={`h-4.5 w-4.5 transition-colors ${
-                favorited
-                  ? "fill-red-500 text-red-500"
+          {/* Quick Actions (Wishlist, Compare, Share) */}
+          <div className="absolute top-6 right-6 z-10 flex flex-col gap-1.5 items-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleWishlist(product);
+              }}
+              className="h-9 w-9 rounded-full bg-white/95 dark:bg-slate-800/90 shadow-md flex items-center justify-center text-slate-450 hover:text-red-505 hover:scale-110 active:scale-95 transition-all"
+            >
+              <Heart
+                className={`h-4.5 w-4.5 transition-colors ${
+                  favorited
+                    ? "fill-red-500 text-red-500"
+                    : "text-slate-400 dark:text-slate-500"
+                }`}
+              />
+            </button>
+            <button
+              onClick={handleCompareClick}
+              className={`h-9 w-9 rounded-full bg-white/95 dark:bg-slate-800/90 shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all ${
+                isCompared
+                  ? "text-brand-500"
                   : "text-slate-400 dark:text-slate-500"
               }`}
-            />
-          </button>
+              title="Compare Specifications"
+            >
+              <Scale className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleShareClick}
+              className="h-9 w-9 rounded-full bg-white/95 dark:bg-slate-800/90 shadow-md flex items-center justify-center text-slate-400 hover:text-brand-500 hover:scale-110 active:scale-95 transition-all"
+              title="Copy link"
+            >
+              {shared ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Share2 className="h-4 w-4" />
+              )}
+            </button>
+          </div>
 
           {/* Product Image Frame */}
           <div className="relative mb-4 h-52 w-full overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center p-4">
@@ -114,6 +189,23 @@ export const ProductCard = ({ product, onNavigate }) => {
             <span>{product.category}</span>
           </div>
 
+          {/* Seller details */}
+          {product.sellerName && (
+            <div className="flex items-center justify-between mb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+              <span className="truncate">
+                Seller:{" "}
+                <span className="text-slate-700 dark:text-slate-300">
+                  {product.sellerName}
+                </span>
+              </span>
+              {product.sellerRating && (
+                <span className="text-amber-500 flex items-center gap-0.5 font-semibold">
+                  ★ {product.sellerRating}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Title */}
           <h3 className="font-display font-extrabold text-sm text-slate-800 dark:text-white leading-tight mb-2 group-hover:text-brand-500 line-clamp-2 transition-colors">
             {product.name}
@@ -142,11 +234,11 @@ export const ProductCard = ({ product, onNavigate }) => {
           <div className="flex items-baseline justify-between gap-1 mb-2">
             <div className="flex items-baseline gap-2">
               <span className="text-base font-extrabold text-slate-900 dark:text-white font-display">
-                ₹{product.discountPrice}
+                ${product.discountPrice}
               </span>
               {product.price > product.discountPrice && (
                 <span className="text-xs text-slate-400 line-through">
-                  ₹{product.price}
+                  ${product.price}
                 </span>
               )}
             </div>
@@ -158,7 +250,7 @@ export const ProductCard = ({ product, onNavigate }) => {
           </div>
 
           {/* Swatches (Color dots) */}
-          <div className="flex gap-1.5 mb-4">
+          <div className="flex gap-1.5 mb-2">
             {product.colors.map((col) => (
               <button
                 key={col.code}
@@ -177,6 +269,23 @@ export const ProductCard = ({ product, onNavigate }) => {
             ))}
           </div>
 
+          {/* Used Item Condition / Bulk Quantity Tier Details */}
+          {product.condition && product.sellerType !== "official" ? (
+            <div className="text-[10px] font-bold text-slate-405 dark:text-slate-500 mb-4 flex items-center justify-between h-4">
+              <span>
+                Cond:{" "}
+                <span className="text-brand-500">{product.condition}</span>
+              </span>
+              {product.location && (
+                <span className="flex items-center gap-0.5">
+                  <MapPin className="h-3 w-3" /> {product.location}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="mb-4 h-4" />
+          )}
+
           {/* Low Stock Warning */}
           {product.stock < 5 && (
             <div className="flex items-center gap-1 text-[10px] text-red-500 font-bold mb-4 animate-pulse">
@@ -184,8 +293,7 @@ export const ProductCard = ({ product, onNavigate }) => {
               <span>Only {product.stock} items left in stock!</span>
             </div>
           )}
-        </div>
-
+        </div>{" "}
         {/* Action CTAs */}
         <div className="flex gap-2 mt-auto">
           <button
@@ -199,12 +307,25 @@ export const ProductCard = ({ product, onNavigate }) => {
             <ShoppingCart className="h-3.5 w-3.5" />
             <span>{added ? "Added!" : "Add Cart"}</span>
           </button>
-          <button
-            onClick={handleBuyNow}
-            className="px-3 py-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all duration-300"
-          >
-            Buy
-          </button>
+
+          {product.sellerType && product.sellerType !== "official" ? (
+            /* Chat icon button for Marketplace items */
+            <button
+              onClick={handleContactSeller}
+              className="px-3 py-2.5 border border-slate-200 text-slate-650 dark:border-slate-800 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-brand-500"
+              title="Chat with Seller"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+          ) : (
+            /* Buy Now button for Official Store items */
+            <button
+              onClick={handleBuyNow}
+              className="px-3 py-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all duration-300"
+            >
+              Buy
+            </button>
+          )}
         </div>
       </motion.div>
 
