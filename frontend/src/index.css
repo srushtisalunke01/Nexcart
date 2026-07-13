@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-luxury-gray-light text-luxury-blue-dark font-sans;
+    background-image: radial-gradient(circle at 10% 20%, rgba(11, 60, 93, 0.02) 0%, transparent 40%),
+                      radial-gradient(circle at 90% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 40%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Luxury Glassmorphism Utilities */
+  .glass-card-light {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(11, 60, 93, 0.04);
+  }
+
+  .glass-card-dark {
+    background: rgba(3, 20, 34, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-navbar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(11, 60, 93, 0.06);
+  }
+
+  /* Interactive Elements */
+  .btn-primary {
+    @apply relative overflow-hidden px-6 py-3 rounded-full font-semibold transition-all duration-300
+           bg-luxury-blue text-white hover:bg-luxury-blue-light active:scale-95 shadow-md hover:shadow-lg;
+  }
+
+  .btn-gold {
+    @apply relative overflow-hidden px-6 py-3 rounded-full font-semibold transition-all duration-300
+           bg-luxury-gold text-luxury-blue-dark hover:bg-luxury-gold-light active:scale-95 shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-full font-semibold border-2 border-luxury-blue text-luxury-blue 
+           hover:bg-luxury-blue hover:text-white transition-all duration-300 active:scale-95;
+  }
+
+  /* Custom input styling */
+  .luxury-input {
+    @apply w-full px-4 py-3 rounded-xl border border-luxury-gray-medium bg-white/50 focus:bg-white 
+           focus:ring-2 focus:ring-luxury-blue focus:border-transparent outline-none transition-all duration-300;
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f3f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Luxury animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-luxury-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Text glow effects */
+.gold-glow-text {
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+}
